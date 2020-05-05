@@ -1,0 +1,133 @@
+Configuring the persistence layer 
+  
+  Usually, administrators will edit the appropriate configuration file, for example
+uas.config in case of UNICORE/X and provide configuration for the persistence.
+
+  <<NOTE>> All properties can be specified on a "per table" basis, by appending ".<TABLENAME>"
+to the property name
+
+
+* Additional requirements
+
+  The default database is H2. For other databases, it might be required to download the appropriate JDBC 
+driver. The individual reference pages give the download URL.
+
+* Basic configuration options
+
+*-----------------------------------+-------------------+-------------------+-------------------+
+|<<property name>>					|<<range of values>>|<<default value>>	|<<description>>	|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|persistence.config                  |String	|   | name of a config file to read  |
+*-----------------------------------+-------------------+-------------------+-------------------+
+|persistence.class                  |String	| de.fzj.unicore.persist.impl.H2Persist  | name of the Java class  |
+*-----------------------------------+-------------------+-------------------+-------------------+
+|persistence.driver	                |String	| (implemention class may provide their own)  |Java class name of the JDBC driver |
+*-----------------------------------+-------------------+-------------------+-------------------+
+|persistence.database               |String	|   | name of the database to connect to |
+*-----------------------------------+-------------------+-------------------+-------------------+
+|persistence.user	                |String	|   | database user name |
+*-----------------------------------+-------------------+-------------------+-------------------+
+|persistence.password	            |String	|   | database password |
+*-----------------------------------+-------------------+-------------------+-------------------+
+|persistence.host	            |String	| localhost | database server host |
+*-----------------------------------+-------------------+-------------------+-------------------+
+|persistence.port	            |String	|  depends on the implementation | database server port |
+*-----------------------------------+-------------------+-------------------+-------------------+
+
+* Separate config file
+
+  It is possible to specify a configuration file using the "persistence.config" property. Thus, persistence configuration
+can be easily shared between components (say, XNJS and WSRFlite). If the "persistence.config" property is set, the given
+file will be read as a Java properties file, and the properties will be used. However, "local" properties will override the
+ones given in the file. 
+
+* Caching
+  
+  By default, caching is enabled. It can be switched off and configured on a per-table (i.e. per entity class) basis.
+If you have a lot of memory for your server, you might consider increasing the cache size for certain components.
+
+  The following properties exist.
+
+
+*------------------------------------+-------------------+-------------------+-------------------+
+|<<property name>>					 |<<range of values>>|<<default value>>	|<<description>>	|
+*------------------------------------+-------------------+-------------------+-------------------+
+|persistence.cache.enable            |String	| "true"  | "true" or "false" to enable/disable caching for the given table |
+*------------------------------------+-------------------+-------------------+-------------------+
+|persistence.cache.maxSize          |Integer	| 50  | maximum number of elements to keep in the cache |
+*------------------------------------+-------------------+-------------------+-------------------+
+
+  <<NOTE>> The table name is case sensitive!
+
+  For example, to set the maximum size of the JOBS cache to 1000, you'd configure
+
++-------------
+persistence.cache.maxSize.JOBS
++-------------
+
+
+* Clustering
+
+  If you intend to run a configuration with multiple UNICORE servers accessing a shared database, you need
+to enable clustering mode by setting a property
+
++-------------
+persistence.cluster.enable=true
++-------------
+
+  The clustering config file can be set using a (per-table) property 
+
++-------------
+persistence.cluster.config=<path to config file>
++-------------
+  
+  If this is not set, a 
+  is taken fro
+  For clustering Hazelcast is used (http://www.hazelcast.com/documentation.jsp). A simple TCP based configuration
+is
+
++--------------------
+<hazelcast>
+    <group>
+        <name>dev</name>
+        <password>dev-pass</password>
+    </group>
+    <network>
+        <port auto-increment="true">5701</port>
+        <join>
+            <multicast enabled="false">
+                <multicast-group>224.2.2.3</multicast-group>
+                <multicast-port>54327</multicast-port>
+            </multicast>
+            <tcp-ip enabled="true">
+                <interface>127.0.0.1</interface>
+            </tcp-ip>
+        </join>
+        <interfaces enabled="false">
+            <interface>10.3.17.*</interface>
+        </interfaces>
+    </network>
+    <executor-service>
+        <core-pool-size>16</core-pool-size>
+        <max-pool-size>64</max-pool-size>
+        <keep-alive-seconds>60</keep-alive-seconds>
+    </executor-service>
+    <queue name="default">
+        <max-size-per-jvm>10000</max-size-per-jvm>
+        <time-to-live-seconds>0</time-to-live-seconds>
+    </queue>
+    <map name="default">
+        <backup-count>1</backup-count>
+        <eviction-policy>NONE</eviction-policy>
+        <max-size>0</max-size>
+        <eviction-percentage>25</eviction-percentage>
+    </map>
+</hazelcast>
++--------------------
+
+  The most important part is the "tcp-ip" setting, which must list at least one other node in the cluster.
+The "group" setting allows to run multiple clusters on the same set of hosts, just make sure that the group name is the
+same for all nodes in a cluster.
+
+  Most of the other settings (map, executor-service, etc) are currently not important, because only the distributed lock
+feature of Hazelcast is used. Please read the Hazelcast documentation for further information. 

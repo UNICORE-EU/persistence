@@ -1,0 +1,41 @@
+Configuring the persistence using the H2 database
+  
+  This covers specifics of H2
+
+  <<NOTE>> All properties can be specified on a "per table" basis, by appending ".<TABLENAME>"
+to the property name
+
+* Introduction
+
+  H2 is a pure Java database engine. It can be used in embedded mode (i.e. the engine runs in-process), or
+in server mode, if multiple UNICORE servers should use the same database server. For more information, visit
+http://www.h2database.com
+
+
+* Configuration options
+
+*-----------------------------------+-------------------+-------------------+-------------------+
+|<<property name>>					|<<range of values>>|<<default value>>	|<<description>>	|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|persistence.directory              |String	|   | name of the directory for storing data |
+*-----------------------------------+-------------------+-------------------+-------------------+
+|persistence.h2.server_mode         |"true" or "false"	| false | whether to connect to a h2 server using tcp   |
+*-----------------------------------+-------------------+-------------------+-------------------+
+|persistence.h2.cache_size          |String denoting an Integer	| 4096  | in-memory cache size for H2 in kilobytes |
+*-----------------------------------+-------------------+-------------------+-------------------+
+
+* Connection URL
+
+
+  In embedded mode, the connection URL is constructed from the configuration properties as follows
+  
++-----
+  jdbc:h2:file:<persistence.directory>/<table_name>
++----  
+  
+    In server mode, the connection URL is constructed as follows
+  
++-----
+  jdbc:h2:tcp://<persistence.host>:<persistence.port>/<persistence.directory>/<table_name>
++----
+

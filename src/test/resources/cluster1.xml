@@ -1,0 +1,15 @@
+<hazelcast xmlns="http://www.hazelcast.com/schema/config">
+    <group>
+        <name>persistence-dev</name>
+        <password>dev-pass</password>
+    </group>
+    <network>
+        <port auto-increment="true">5701</port>
+        <join>
+            <multicast enabled="false"/>
+            <tcp-ip enabled="true">
+                <member>127.0.0.1</member>
+            </tcp-ip>
+        </join>
+    </network>
+</hazelcast>

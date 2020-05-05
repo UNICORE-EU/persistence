@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="UNICORE/X persistence">
+  <bannerLeft>
+    <name>UNICORE/X Persistence</name>
+    <src>images/unicorelogo.gif</src>
+    <href>http://www.unicore.eu/</href>
+  </bannerLeft>
+  <bannerRight>
+    <src>images/fzj.gif</src>
+<href>http://www.fz-juelich.de/zam/grid</href>
+  </bannerRight>
+  <body>
+    <links>
+      <item name="UNICORE" href="http://www.unicore.eu" />
+    </links> 
+    <menu name="UNICORE/X Persistence">
+      <item name="Introduction" href="index.html"/>
+      <item name="Configuration" href="configuration.html"/>
+    </menu>
+ 
+ ${reports}
+
+  </body>
+</project>
