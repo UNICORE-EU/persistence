@@ -16,7 +16,7 @@
     <h2.version>1.4.199</h2.version>
     <metrics.version>3.2.6</metrics.version>
     <gson.version>2.8.5</gson.version>
-    <guava.version>27.1-jre</guava.version>
+    <guava.version>29.0-jre</guava.version>
     <hazelcast.version>3.10.5</hazelcast.version>
   </properties>
 
@@ -29,8 +29,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:svn:https://svn.code.sf.net/p/unicore/svn/persistence/tags/persistence-0.103</connection>
-    <developerConnection>scm:svn:https://svn.code.sf.net/p/unicore/svn/persistence/tags/persistence-0.103</developerConnection>
+    <url>https://github.com/UNICORE-EU/persistence</url>
+    <connection>scm:git:git://github.com/UNICORE-EU/persistence.git</connection>
+    <developerConnection>scm:git:git://github.com/UNICORE-EU/persistence.git</developerConnection>
   </scm>
   <build>
     <plugins>
