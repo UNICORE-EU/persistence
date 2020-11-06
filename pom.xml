@@ -28,9 +28,10 @@
   </developers>
   
   <scm>
-    <url>https://github.com/UNICORE-EU/persistence</url>
     <connection>scm:git:git://github.com/UNICORE-EU/persistence.git</connection>
-    <developerConnection>scm:git:git://github.com/UNICORE-EU/persistence.git</developerConnection>
+    <developerConnection>scm:git:ssh://git@github.com/UNICORE-EU/persistence.git</developerConnection>
+    <url>https://github.com/UNICORE-EU/persistence</url>
+    <tag>HEAD</tag>
   </scm>
 
   <build>
