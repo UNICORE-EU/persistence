@@ -3,8 +3,14 @@
   <groupId>de.fzj.unicore</groupId>
   <artifactId>persistence</artifactId>
   <name>Lightweight Object Persistence Layer</name>
-  <version>0.200</version>
+  <version>0.201-SNAPSHOT</version>
 
+  <parent>
+    <groupId>eu.unicore</groupId>
+    <artifactId>unicore-parent</artifactId>
+    <version>1.22</version>
+  </parent>
+        
   <properties>
     <mysql.version>8.0.22</mysql.version>
     <h2.version>1.4.200</h2.version>
