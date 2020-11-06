@@ -1,11 +1,16 @@
 package de.fzj.unicore.persist.impl;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
 import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.PersistenceProperties;
@@ -14,26 +19,39 @@ import de.fzj.unicore.persist.PersistenceProperties;
 /**
  * runs a set of tests with different data sizes and instance numbers
  */
+@RunWith(Parameterized.class)
 public class PerftestH2Persist {
 
-	private PersistImpl<Dao1>p;
+	private static PersistImpl<Dao1>p;
 
 	private Random rand=new Random();
 
-	@AfterClass
-	protected void cleanUp()throws Exception{
-		p.dropTables();
+	@Parameters
+	public static Collection<Object[]>getDataForJSONTest(){
+		return Arrays.asList(new Object[][]{
+				// numberOfInstances, size, cache
+				{10000,5000,Boolean.FALSE},
+				{10000,5000,Boolean.FALSE}
+		});
 	}
-
+	
 	protected void createPersist(){
+		FileUtils.deleteQuietly(new File("target/test_data"));
 		p=new H2Persist<Dao1>();
 		PersistenceProperties props = new PersistenceProperties();
 		props.setDatabaseDirectory("target/test_data");
 		p.setConfigSource(props);
 	}
 	
-	@Test(dataProvider="data-provider-json")
-	public void perfTestJSONvsBinary(int numberOfInstances, int size, Boolean cache)throws PersistenceException{
+	@Parameter
+	public int numberOfInstances; 
+	@Parameter(1)
+	public int size;
+	@Parameter(2)
+	public Boolean cache;
+	
+	@Test
+	public void perfTestJSONvsBinary()throws PersistenceException{
 		doTest(numberOfInstances, size, cache);
 	}
 	
@@ -75,6 +93,7 @@ public class PerftestH2Persist {
 		assert ids.size()>0;
 		System.out.println("Time for selecting subset: "+(System.currentTimeMillis()-start));
 		System.out.println("Read cache hits: "+p.getCacheHits());
+		p.shutdown();
 	}
 
 	protected void readSomeRandomEntries(int numberOfInstances)throws PersistenceException{
@@ -84,12 +103,5 @@ public class PerftestH2Persist {
 		}
 	}
 
-	@DataProvider(name="data-provider-json")
-	protected Object[][]getDataForJSONTest(){
-		return new Object[][]{
-				// numberOfInstances, size, cache
-				{10000,5000,Boolean.FALSE},
-				{10000,5000,Boolean.FALSE},
-		};
-	}
+
 }

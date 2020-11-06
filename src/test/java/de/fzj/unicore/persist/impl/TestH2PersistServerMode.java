@@ -4,10 +4,9 @@ import java.util.Collection;
 import java.util.Random;
 
 import org.h2.tools.Server;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.PersistenceProperties;
@@ -18,20 +17,20 @@ import de.fzj.unicore.persist.PersistenceProperties;
  */
 public class TestH2PersistServerMode {
 
-	private H2Persist<Dao1>p;
+	private static H2Persist<Dao1>p;
 
 	private Random rand=new Random();
 
-	private final String port="65530";
+	private static final String port="65530";
 	
 	@BeforeClass
-	protected void setUp()throws Exception{
-		String[]args=new String[]{"-tcp", "-tcpPort", port, "-tcpPassword", "test"};
+	public static void setUp()throws Exception{
+		String[]args=new String[]{"-tcp", "-tcpPort", port, "-tcpPassword", "test", "-ifNotExists"};
 		Server.main(args);
 	}
 	
 	@AfterClass
-	protected void cleanUp()throws Exception{
+	public static void cleanUp()throws Exception{
 		p.dropTables();
 		Server.shutdownTcpServer("tcp://localhost:65530","test",true,true);
 	}
@@ -39,6 +38,7 @@ public class TestH2PersistServerMode {
 	protected void createPersist(){
 		p=new H2Persist<Dao1>();
 		p.setServerMode(true);
+		
 		PersistenceProperties cf=new PersistenceProperties();
 		cf.setProperty(PersistenceProperties.DB_PORT, port);
 		cf.setProperty(PersistenceProperties.DB_POOL_MAXSIZE, "5");
@@ -47,12 +47,15 @@ public class TestH2PersistServerMode {
 		p.setPersistenceDescriptor(PersistenceDescriptor.get(Dao1.class));
 	}
 	
-	@Test(dataProvider="data-provider")
-	public void perfTest(int numberOfInstances, int size, Boolean cache)throws PersistenceException{
-		System.out.println("\n\n**** Running test with numInstances="+numberOfInstances+", data size="+size+", cache="+cache);
+	int numberOfInstances = 100;
+	int size = 100;
+	
+	@Test
+	public void perfTest()throws PersistenceException{
+		System.out.println("\n\n**** Running test with numInstances="+numberOfInstances+", data size="+size);
 		createPersist();
 		p.setDaoClass(Dao1.class);
-		p.setCaching(cache);
+		p.setCaching(true);
 		long start=System.currentTimeMillis();
 		p.init();
 		
@@ -98,11 +101,4 @@ public class TestH2PersistServerMode {
 		}
 	}
 
-	@DataProvider(name="data-provider")
-	protected Object[][]getData(){
-		return new Object[][]{
-				{99,100,Boolean.TRUE},
-		};
-	}
-	
 }

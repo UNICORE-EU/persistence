@@ -3,7 +3,7 @@ package de.fzj.unicore.persist.util;
 import java.io.FileInputStream;
 import java.util.Properties;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import de.fzj.unicore.persist.Persist;
 import de.fzj.unicore.persist.PersistenceFactory;
@@ -11,9 +11,9 @@ import de.fzj.unicore.persist.PersistenceProperties;
 import de.fzj.unicore.persist.impl.Dao1;
 import de.fzj.unicore.persist.impl.H2Persist;
 
-@Test
 public class TestConvert {
 
+	@Test
 	@SuppressWarnings("unchecked")
 	public void test1() throws Exception{
 		Properties in=new Properties();
@@ -47,6 +47,7 @@ public class TestConvert {
 		conv.shutDown();
 	}
 	
+	@Test
 	public void testMain() throws Exception{
 		String inProps="src/test/resources/convert1.properties";
 		String outProps="src/test/resources/convert2.properties";

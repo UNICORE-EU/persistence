@@ -1,7 +1,7 @@
 package de.fzj.unicore.persist.impl;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import de.fzj.unicore.persist.Persist;
 import de.fzj.unicore.persist.PersistenceProperties;
@@ -14,7 +14,7 @@ public class TestDataIntegrity {
 	
 	String[] ids={"1","2","3"};
 	
-	@BeforeMethod
+	@Before
 	public void init()throws Exception{
 		total=0;
 		p=new H2Persist<Dao3>();

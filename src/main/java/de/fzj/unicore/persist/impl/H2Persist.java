@@ -45,11 +45,12 @@ import java.util.Set;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.h2.jdbcx.JdbcDataSource;
 
 import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.PersistenceProperties;
+import eu.unicore.util.Log;
 
 /**
  * H2 database based persistence
@@ -58,7 +59,7 @@ import de.fzj.unicore.persist.PersistenceProperties;
  */
 public class H2Persist<T> extends PersistImpl<T>{
 
-	private static final Logger logger=Logger.getLogger("unicore.persistence."+H2Persist.class.getSimpleName());
+	private static final Logger logger = Log.getLogger("unicore.persistence", H2Persist.class);
 
 	protected Boolean serverMode=null;
 

@@ -41,7 +41,7 @@ import java.util.List;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 
@@ -57,7 +57,7 @@ import eu.unicore.util.Log;
  */
 public class MySQLPersist<T> extends PersistImpl<T>{
 
-	private static final Logger logger=Logger.getLogger("unicore.persistence."+MySQLPersist.class.getSimpleName());
+	private static final Logger logger = Log.getLogger("unicore.persistence", MySQLPersist.class);
 
 	private String sqlHost, sqlPort, sqlUser, sqlPass, sqlType;
 

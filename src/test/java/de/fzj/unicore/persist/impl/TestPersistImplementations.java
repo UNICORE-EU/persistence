@@ -1,11 +1,14 @@
 package de.fzj.unicore.persist.impl;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
 
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
-import de.fzj.unicore.persist.Persist;
 import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.PersistenceProperties;
 
@@ -16,21 +19,22 @@ import de.fzj.unicore.persist.PersistenceProperties;
  * 
  * @author schuller
  */
+@RunWith(Parameterized.class)
 public class TestPersistImplementations {
 
-	/**
-	 * @return implementations of {@link Persist} for testing
-	 */
-	@DataProvider(name="data-provider")
-	public Object[][] getSettings(){
-		return new Object[][]{
-				{H2Persist.class},
-				{InMemory.class},
-		};
+	@Parameters
+	public static Iterable<? extends Object> implementations(){
+		return Arrays.asList(
+				H2Persist.class,
+				InMemory.class
+		);
 	}	
 
-	@Test(dataProvider="data-provider")
-	public void testBasic(Class<? extends PersistImpl<Dao1>> persistClass) throws Exception {
+	@Parameter
+	public Class<? extends PersistImpl<?>> persistClass;
+	
+	@Test
+	public void testBasic() throws Exception {
 		PersistenceProperties cf=new PersistenceProperties();
 		cf.setDatabaseDirectory("./target/test_data");
 		new Tester(persistClass, cf).run();

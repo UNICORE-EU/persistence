@@ -3,7 +3,7 @@ package de.fzj.unicore.persist.impl;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 
 public class TestClassScanner {
@@ -37,12 +37,12 @@ public class TestClassScanner {
 	}
 	
 	
-	@Test(expectedExceptions=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testFaultyDAO1(){
 		ClassScanner.getGetIdMethod(FaultyDao1.class);
 	}
 	
-	@Test(expectedExceptions=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testFaultyDAO2(){
 		ClassScanner.getGetIdMethod(FaultyDao2.class);
 	}

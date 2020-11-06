@@ -2,16 +2,17 @@ package de.fzj.unicore.persist.util;
 
 import java.util.Properties;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import de.fzj.unicore.persist.Persist;
 import de.fzj.unicore.persist.PersistenceProperties;
 import de.fzj.unicore.persist.impl.Dao1;
 import de.fzj.unicore.persist.impl.H2Persist;
 
-@Test
 public class TestExportImport {
 
+
+	@Test
 	@SuppressWarnings("unchecked")
 	public void testExport() throws Exception{
 		Properties in=new Properties();
@@ -35,6 +36,8 @@ public class TestExportImport {
 		export.doExport();
 	}
 	
+
+	@Test
 	@SuppressWarnings("unchecked")
 	public void testImport() throws Exception{
 		Properties out=new Properties();

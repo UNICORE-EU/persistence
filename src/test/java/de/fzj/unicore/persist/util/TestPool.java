@@ -20,7 +20,7 @@ import java.util.Random;
 
 import javax.sql.ConnectionPoolDataSource;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 public class TestPool {
 

@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Metric;
@@ -50,6 +50,7 @@ import de.fzj.unicore.persist.ObjectMarshaller;
 import de.fzj.unicore.persist.Persist;
 import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.PersistenceProperties;
+import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 
 /**
@@ -61,7 +62,7 @@ import eu.unicore.util.configuration.ConfigurationException;
  */
 public abstract class Base<T> implements Persist<T>{
 
-	private static final Logger logger=Logger.getLogger("unicore.persistence."+Base.class.getSimpleName());
+	private static final Logger logger = Log.getLogger("unicore.persistence", Base.class);
 
 	protected Class<T>daoClass;
 

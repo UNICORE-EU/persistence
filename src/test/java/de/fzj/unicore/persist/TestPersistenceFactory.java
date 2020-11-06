@@ -3,7 +3,7 @@ package de.fzj.unicore.persist;
 import java.io.File;
 
 import org.apache.commons.io.FileUtils;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import de.fzj.unicore.persist.impl.Dao1;
 import de.fzj.unicore.persist.impl.H2Persist;
@@ -11,8 +11,6 @@ import de.fzj.unicore.persist.impl.InMemory;
 import de.fzj.unicore.persist.impl.MySQLPersist;
 import eu.unicore.util.configuration.ConfigurationException;
 
-
-@Test
 public class TestPersistenceFactory {
 
 	@Test
@@ -46,7 +44,7 @@ public class TestPersistenceFactory {
 		assert clazz.isAssignableFrom(MySQLPersist.class);
 	}
 	
-	@Test(expectedExceptions=ConfigurationException.class)
+	@Test(expected = ConfigurationException.class)
 	public void testConfigurePersistImplementationInvalidFile()throws Exception{
 		PersistenceProperties p=new PersistenceProperties();
 		p.setProperty(PersistenceProperties.FILE, "src/test/resources/persistence.properties.DOESNOTEXIST");

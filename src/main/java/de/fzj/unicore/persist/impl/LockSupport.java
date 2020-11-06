@@ -6,7 +6,9 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.hazelcast.core.ILock;
+import com.hazelcast.core.DistributedObject;
+
+//import com.hazelcast.
 
 import de.fzj.unicore.persist.cluster.Cluster;
 import eu.unicore.util.configuration.ConfigurationException;
@@ -97,7 +99,9 @@ public class LockSupport {
 				l.unlock();
 			}catch(Exception me){}
 			if(distributed){
-				((ILock)l).destroy();
+				if(l instanceof DistributedObject) {
+					((DistributedObject)l).destroy();
+				}
 			}
 		}
 		String key=tableName+id;
@@ -108,8 +112,10 @@ public class LockSupport {
 		if(locks!=null){
 			if(distributed){
 				for(String key: locks.keySet()){
-					((ILock)cluster.getLock(key)).destroy();
-				}
+					Lock l = locks.get(key);
+					if(l instanceof DistributedObject) {
+						((DistributedObject)l).destroy();
+					}}
 			}
 			locks.clear();
 		}

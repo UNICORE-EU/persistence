@@ -7,13 +7,14 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.Lock;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
-import com.hazelcast.config.FileSystemXmlConfig;
+import com.hazelcast.config.FileSystemYamlConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
 import de.fzj.unicore.persist.PersistenceProperties;
+import eu.unicore.util.Log;
 
 /**
  * clustering support
@@ -22,7 +23,7 @@ import de.fzj.unicore.persist.PersistenceProperties;
  */
 public class Cluster {
 
-	private static final Logger logger=Logger.getLogger("unicore.persistence."+Cluster.class.getSimpleName());
+	private static final Logger logger = Log.getLogger("unicore.persistence", Cluster.class);
 	
 	private static Cluster theDefaultInstance=null;
 	
@@ -45,7 +46,7 @@ public class Cluster {
 			logger.info("Created cluster instance based on default configuration.");
 		}
 		else{
-			FileSystemXmlConfig config=new FileSystemXmlConfig(configFile);
+			FileSystemYamlConfig config=new FileSystemYamlConfig(configFile);
 			hazelcast=Hazelcast.newHazelcastInstance(config);
 			logger.info("Created cluster instance based on configuration file "+configFile);
 		}
@@ -84,7 +85,7 @@ public class Cluster {
 	 * @param the ID of the lock (must be unique per VM and cluster instance!)
 	 */
 	public Lock getLock(String key){
-		return hazelcast.getLock(key);
+		return hazelcast.getCPSubsystem().getLock(key);
 	}
 	
 	/**

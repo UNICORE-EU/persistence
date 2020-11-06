@@ -16,7 +16,7 @@ public class GSONUtil {
 		if(json!=null && json.customHandlers().length>0){
 			for(Class<?> c: json.customHandlers()){
 				try{ 
-					GSONConverter conv=(GSONConverter)c.newInstance();
+					GSONConverter conv=(GSONConverter)c.getConstructor().newInstance();
 					for(Object adapter: conv.getAdapters()){
 						if(conv.isHierarchy()){
 							builder.registerTypeHierarchyAdapter((Class<?>)conv.getType(),adapter);
