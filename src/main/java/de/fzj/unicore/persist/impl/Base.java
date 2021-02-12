@@ -33,16 +33,12 @@
 package de.fzj.unicore.persist.impl;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
 
 import org.apache.logging.log4j.Logger;
 
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Metric;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
@@ -80,8 +76,6 @@ public abstract class Base<T> implements Persist<T>{
 
 	protected ObjectMarshaller<T> marshaller;
 
-	private final Map<String, Metric> metricSet = new HashMap<>();
-	
 	public Base(){
 	}
 
@@ -96,19 +90,12 @@ public abstract class Base<T> implements Persist<T>{
 	public void init()throws PersistenceException{
 		if(pd==null)pd=PersistenceDescriptor.get(daoClass);
 		String table=pd.getTableName();
-
 		try {
 			// check that we can load the driver class
 			Class.forName(getDriverName());
-			
 			initLockSupport();
-
 			initCache();
-
 			createMarshaller();
-			
-			createMetrics();
-			
 		} catch (Exception e) {
 			logger.error("Error setting up persistence implementation for table <"+table+">",e);
 			throw new RuntimeException(e);
@@ -377,21 +364,6 @@ public abstract class Base<T> implements Persist<T>{
 
 	public String getStatusMessage(){
 		return "OK";
-	}
-	
-	protected void createMetrics(){
-		Gauge<String> g = new Gauge<String>() {
-			@Override
-			public String getValue() {
-				return getStatusMessage();
-			}
-		};
-		metricSet.put("unicore.persist."+pd.getTableName(), g);
-	}
-	
-	@Override
-	public Map<String,Metric>getMetrics() {
-		return metricSet;
 	}
 
 }

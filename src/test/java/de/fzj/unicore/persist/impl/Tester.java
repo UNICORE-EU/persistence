@@ -8,9 +8,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Ignore;
 
-import com.codahale.metrics.ConsoleReporter;
-import com.codahale.metrics.MetricRegistry;
-
 import de.fzj.unicore.persist.Persist;
 import de.fzj.unicore.persist.PersistenceProperties;
 
@@ -43,7 +40,6 @@ public class Tester {
 		testAdditionalColumns(true);
 		testFindIDs(true);
 		testLocking();
-		testMetrics();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -216,16 +212,5 @@ public class Tester {
 		}
 		
 	}
-	
-	@SuppressWarnings("unchecked")
-	private void testMetrics() throws Exception {
-		final Persist<Dao1>p=(Persist<Dao1>)persistClass.getConstructor().newInstance();
-		p.setDaoClass(Dao1.class);
-		if(properties!=null)p.setConfigSource(properties);
-		p.init();
-		MetricRegistry registry = new MetricRegistry();
-		ConsoleReporter r = ConsoleReporter.forRegistry(registry).build();
-		registry.registerAll(p);
-		r.report();
-	}
+
 }

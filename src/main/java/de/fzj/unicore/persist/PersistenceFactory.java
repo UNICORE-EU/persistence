@@ -40,8 +40,6 @@ import java.util.Properties;
 
 import org.apache.logging.log4j.Logger;
 
-import com.codahale.metrics.MetricRegistry;
-
 import de.fzj.unicore.persist.impl.ClassScanner;
 import de.fzj.unicore.persist.impl.H2Persist;
 import de.fzj.unicore.persist.impl.LockSupport;
@@ -61,11 +59,8 @@ public class PersistenceFactory {
 	
 	private final PersistenceProperties config;
 	
-	private final MetricRegistry metricRegistry;
-	
-	private PersistenceFactory(PersistenceProperties config, MetricRegistry metricRegistry){
+	private PersistenceFactory(PersistenceProperties config){
 		this.config = config;
-		this.metricRegistry = metricRegistry;
 	}
 	
 	public PersistenceProperties getConfig() {
@@ -73,10 +68,6 @@ public class PersistenceFactory {
 	}
 
 	public static synchronized PersistenceFactory get(PersistenceProperties config){
-		return get(config, null);
-	}
-
-	public static synchronized PersistenceFactory get(PersistenceProperties config, MetricRegistry metricRegistry){
 		PersistenceProperties realConfig = null;
 		//check if we must merge properties from an additional config file
 		File cFile=config==null? null : config.getFileValue(PersistenceProperties.FILE, false);
@@ -99,7 +90,7 @@ public class PersistenceFactory {
 		}else{
 			realConfig = config;
 		}
-		return new PersistenceFactory(realConfig, metricRegistry);
+		return new PersistenceFactory(realConfig);
 	}
 
 	/**
@@ -169,9 +160,6 @@ public class PersistenceFactory {
 		p.setDaoClass(daoClass);
 		p.setLockSupport(locks);
 		p.init();
-		if(metricRegistry!=null){
-			metricRegistry.registerAll(p);
-		}
 		return p;
 	}
 

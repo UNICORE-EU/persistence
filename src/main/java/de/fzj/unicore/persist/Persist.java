@@ -37,8 +37,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.codahale.metrics.MetricSet;
-
 import de.fzj.unicore.persist.impl.LockSupport;
 import de.fzj.unicore.persist.impl.PersistenceDescriptor;
 
@@ -54,7 +52,7 @@ import de.fzj.unicore.persist.impl.PersistenceDescriptor;
  * 
  * @author schuller
  */
-public interface Persist<T> extends MetricSet {
+public interface Persist<T> {
 
 	/**
 	 * get an object from the persistence layer for read-only access
