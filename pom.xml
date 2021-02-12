@@ -3,7 +3,7 @@
   <groupId>de.fzj.unicore</groupId>
   <artifactId>persistence</artifactId>
   <name>Lightweight Object Persistence Layer</name>
-  <version>0.202</version>
+  <version>0.203</version>
 
   <parent>
     <groupId>eu.unicore</groupId>
