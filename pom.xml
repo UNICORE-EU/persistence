@@ -8,16 +8,16 @@
   <parent>
     <groupId>eu.unicore</groupId>
     <artifactId>unicore-parent</artifactId>
-    <version>1.22</version>
+    <version>1.23</version>
   </parent>
         
   <properties>
-    <mysql.version>8.0.22</mysql.version>
+    <mysql.version>8.0.25</mysql.version>
     <h2.version>1.4.200</h2.version>
     <gson.version>2.8.6</gson.version>
     <guava.version>30.0-jre</guava.version>
     <hazelcast.version>4.1</hazelcast.version>
-    <seclib.version>5.2.0</seclib.version>
+    <seclib.version>5.3.1</seclib.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -27,8 +27,8 @@
     <developer>
       <name>Bernd Schuller</name>
       <email>bschuller at users.sourceforge.net</email>
-      <organization>Research Center Juelich</organization>
-      <organizationUrl>http://www.fz-juelich.de</organizationUrl>
+      <organization>Forschungszentrum Juelich GmbH</organization>
+      <organizationUrl>https://www.fz-juelich.de/jsc</organizationUrl>
     </developer>
   </developers>
   
