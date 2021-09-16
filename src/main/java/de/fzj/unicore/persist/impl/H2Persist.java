@@ -132,13 +132,16 @@ public class H2Persist<T> extends PersistImpl<T>{
 		String type=getSQLStringType();
 		cmds.add("CREATE TABLE IF NOT EXISTS "+pd.getTableName()+
 				 " (id "+type+" PRIMARY KEY, data "+type+")");
+		boolean haveTable = tableExists();
 		if(pd.getColumns().size()>0){
-			boolean haveTable = tableExists();
 			for(ColumnDescriptor c: pd.getColumns()){
 				if(!haveTable || !columnExists(c.getColumn())){
 					cmds.add("ALTER TABLE "+pd.getTableName()+" ADD COLUMN "+c.getColumn()+" "+type);
 				}
 			}
+		}
+		if(!haveTable || !columnExists("CREATED")){
+			cmds.add("ALTER TABLE "+pd.getTableName()+" ADD COLUMN CREATED "+type+" NOT NULL DEFAULT '"+getTimeStamp()+"'");
 		}
 		return cmds;
 	}

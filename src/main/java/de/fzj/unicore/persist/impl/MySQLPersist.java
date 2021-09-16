@@ -69,13 +69,16 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 		String type=getSQLStringType();
 		cmds.add("CREATE TABLE IF NOT EXISTS "+tb+" (id VARCHAR(255) PRIMARY KEY, data "
 				+type+") ENGINE="+sqlType);
+		boolean haveTable = tableExists();
 		if(pd.getColumns().size()>0){
-			boolean haveTable = tableExists();
 			for(ColumnDescriptor c: pd.getColumns()){
 				if(!haveTable || !columnExists(c.getColumn())){
 					cmds.add("ALTER TABLE "+pd.getTableName()+" ADD COLUMN "+c.getColumn()+" "+type);
 				}
 			}
+		}
+		if(!haveTable || !columnExists("CREATED")){
+			cmds.add("ALTER TABLE "+pd.getTableName()+" ADD COLUMN created CHAR(32) NOT NULL DEFAULT '"+getTimeStamp()+"'");
 		}
 		return cmds;
 	}

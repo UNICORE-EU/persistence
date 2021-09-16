@@ -1,6 +1,8 @@
 package de.fzj.unicore.persist.impl;
 
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import de.fzj.unicore.persist.PersistenceException;
@@ -38,11 +40,11 @@ public abstract class SQL<T> extends Base<T>{
 				columns.append(","+c.getColumn());
 				columnValues.append(",?");
 			}
-			return "INSERT INTO "+pd.getTableName()+" (id,data"+columns.toString()+") " +
-			"VALUES (?,?"+columnValues.toString()+");";
+			return "INSERT INTO "+pd.getTableName()+" (id,data,created"+columns.toString()+") " +
+			"VALUES (?,?,?"+columnValues.toString()+");";
 		}
 		else{
-			return "INSERT INTO "+pd.getTableName()+" (id,data) VALUES (?,?);";
+			return "INSERT INTO "+pd.getTableName()+" (id,data,created) VALUES (?,?,?);";
 		}
 	}
 
@@ -69,7 +71,7 @@ public abstract class SQL<T> extends Base<T>{
 	}
 
 	protected String getSQLSelectAllKeys(){
-		return "SELECT ID FROM "+pd.getTableName()+";";
+		return "SELECT ID FROM "+pd.getTableName()+" ORDER BY 'CREATED';";
 	}
 
 	protected String getSQLSelectKeys(String column, Object value){
@@ -108,5 +110,9 @@ public abstract class SQL<T> extends Base<T>{
 	protected String getSQLShutdown(){
 		return null;
 	}
-
+	
+	protected String getTimeStamp() {
+		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis()));
+	}
+	
 }

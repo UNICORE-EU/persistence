@@ -426,8 +426,8 @@ public abstract class PersistImpl<T> extends SQL<T> {
 		psInsert.setString(1, id);
 		String base64=marshaller.encode(dao);
 		psInsert.setString(2, base64);
-
-		int i=3;
+		psInsert.setString(3, getTimeStamp());
+		int i=4;
 		for(ColumnDescriptor c: pd.getColumns()){
 			Object val=c.getMethod().invoke(dao, (Object[])null);
 			psInsert.setString(i, val!=null?val.toString():null);
