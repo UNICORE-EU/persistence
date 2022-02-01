@@ -153,8 +153,8 @@ public class PersistenceProperties extends PropertiesHelper{
 				setDescription("The database port."));
 		META.put(DB_DIRECTORY, new PropertyMD().setCanHaveSubkeys().
 				setDescription("The directory for storing data (embedded DBs)."));
-		META.put(DB_LOCKS_DISTRIBUTED, new PropertyMD("false").setCanHaveSubkeys().
-				setDescription("Enable clustering mode."));
+		META.put(DB_LOCKS_DISTRIBUTED, new PropertyMD("false").setCanHaveSubkeys().setDeprecated().
+				setDescription("(deprecated, no effect)"));
 		META.put(DB_CLUSTER_CONFIG, new PropertyMD().setCanHaveSubkeys().
 				setDescription("Clustering configuration file."));
 		META.put(DB_POOL_MAXSIZE, new PropertyMD("1").setCanHaveSubkeys().

@@ -122,23 +122,9 @@ public abstract class Base<T> implements Persist<T>{
 
 	private void initLockSupport() throws ConfigurationException {
 		if(lockSupport!=null)return;
-
 		String table=pd.getTableName();
 		//init lock handler 
-		boolean distributed=config==null? false : 
-			Boolean.parseBoolean(config.getSubkeyValue(PersistenceProperties.DB_LOCKS_DISTRIBUTED, table));
-		if(distributed){
-			String configFile=config.getSubkeyValue(PersistenceProperties.DB_CLUSTER_CONFIG, table);
-			if(configFile!=null){
-				lockSupport=new LockSupport(configFile,table);
-			}
-			else{
-				lockSupport=new LockSupport(true,table);
-			}
-		}
-		else{
-			lockSupport=new LockSupport(false,table);
-		}
+		lockSupport=new LockSupport(table);
 	}
 
 	/**
