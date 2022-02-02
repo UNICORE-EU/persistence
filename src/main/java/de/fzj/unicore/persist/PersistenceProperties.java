@@ -129,6 +129,11 @@ public class PersistenceProperties extends PropertiesHelper{
 	
 	public static final String MYSQL_SSL = "mysql.useSSL";
 
+	/**
+	 * Postgres
+	 */
+	public static final String PGSQL_SSL = "pgsql.useSSL";
+
 	
 	@DocumentationReferenceMeta
 	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
@@ -177,6 +182,8 @@ public class PersistenceProperties extends PropertiesHelper{
 				setDescription("(MySQL) Server timezone."));
 		META.put(MYSQL_SSL, new PropertyMD("false").setCanHaveSubkeys().
 				setDescription("(MySQL) Connect using SSL."));
+		META.put(PGSQL_SSL, new PropertyMD("true").setCanHaveSubkeys().
+				setDescription("(PostgreSQL) Connect using SSL."));
 	}
 	
 	

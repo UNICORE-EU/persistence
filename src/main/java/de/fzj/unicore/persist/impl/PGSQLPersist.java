@@ -1,5 +1,5 @@
 /*********************************************************************************
- * Copyright (c) 2008 Forschungszentrum Juelich GmbH 
+ * Copyright (c) 2022 Forschungszentrum Juelich GmbH 
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,7 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
 import org.apache.logging.log4j.Logger;
-
-import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
+import org.postgresql.ds.PGConnectionPoolDataSource;
 
 import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.PersistenceProperties;
@@ -51,41 +50,40 @@ import eu.unicore.util.Log;
 
 
 /**
- * MySQL based persistence
+ * PostgreSQL implementation
  * 
  * @author schuller
  */
-public class MySQLPersist<T> extends PersistImpl<T>{
+public class PGSQLPersist<T> extends PersistImpl<T>{
 
-	private static final Logger logger = Log.getLogger("unicore.persistence", MySQLPersist.class);
+	private static final Logger logger = Log.getLogger("unicore.persistence", PGSQLPersist.class);
 
-	private String sqlHost, sqlPort, sqlUser, sqlPass, sqlType;
+	private String sqlHost, sqlPort, sqlUser, sqlPass;
 
 	@Override
 	public List<String> getSQLCreateTable() throws PersistenceException, SQLException {
 		List<String> cmds = new ArrayList<>();
 		String tb=pd.getTableName();
-		if(sqlType==null)sqlType = config.getSubkeyValue(PersistenceProperties.MYSQL_TABLETYPE, tb);
 		String type=getSQLStringType();
 		cmds.add("CREATE TABLE IF NOT EXISTS "+tb+" (id VARCHAR(255) PRIMARY KEY, data "
-				+type+") ENGINE="+sqlType);
+				+type+")");
 		boolean haveTable = tableExists();
 		if(pd.getColumns().size()>0){
 			for(ColumnDescriptor c: pd.getColumns()){
 				if(!haveTable || !columnExists(c.getColumn())){
-					cmds.add("ALTER TABLE "+pd.getTableName()+" ADD COLUMN "+c.getColumn()+" "+type);
+					cmds.add("ALTER TABLE "+pd.getTableName()+" ADD COLUMN IF NOT EXISTS "+c.getColumn()+" "+type);
 				}
 			}
 		}
 		if(!haveTable || !columnExists("CREATED")){
-			cmds.add("ALTER TABLE "+pd.getTableName()+" ADD COLUMN created CHAR(32) NOT NULL DEFAULT '"+getTimeStamp()+"'");
+			cmds.add("ALTER TABLE "+pd.getTableName()+" ADD COLUMN IF NOT EXISTS created char(32) NOT NULL DEFAULT '"+getTimeStamp()+"'");
 		}
 		return cmds;
 	}
 	
 	@Override
 	protected String getSQLStringType(){
-		return "LONGTEXT";
+		return "TEXT";
 	}
 
 	private String connectionURL;
@@ -98,16 +96,16 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 		String tb=pd.getTableName();
 		if(sqlHost==null)sqlHost = config.getSubkeyValue(PersistenceProperties.DB_HOST, tb);
 		if(sqlPort==null)sqlPort = config.getSubkeyValue(PersistenceProperties.DB_PORT, tb);
-		connectionURL = "jdbc:mysql://"+sqlHost+":"+sqlPort+"/"+getDatabaseName()+"?autoReconnect=true";
+		connectionURL = "jdbc:postgresql://"+sqlHost+":"+sqlPort+"/"+getDatabaseName();
 		logger.info("Connecting to: "+connectionURL);
 		return connectionURL;
 	}
 
 	@Override
 	protected String getDriverName(){
-		String driver=config!=null?config.getSubkeyValue(PersistenceProperties.DB_DRIVER, pd.getTableName()):"com.mysql.cj.jdbc.Driver";
+		String driver=config!=null?config.getSubkeyValue(PersistenceProperties.DB_DRIVER, pd.getTableName()):"org.postgresql.Driver";
 		if(driver==null){
-			driver = "com.mysql.cj.jdbc.Driver";
+			driver = "org.postgresql.Driver";
 		}
 		return driver;
 	}
@@ -130,29 +128,25 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 
 	@Override
 	protected ConnectionPoolDataSource getConnectionPoolDataSource(){
-		MysqlConnectionPoolDataSource ds=new MysqlConnectionPoolDataSource();
+		PGConnectionPoolDataSource ds = new PGConnectionPoolDataSource();
 		ds.setDatabaseName(getDatabaseName());
 		sqlHost=config==null?"localhost":config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
-		sqlPort=config==null?"3306":config.getSubkeyValue(PersistenceProperties.DB_PORT, pd.getTableName());
-		ds.setPort(Integer.parseInt(sqlPort));
-		ds.setServerName(sqlHost);
+		sqlPort=config==null?"5432":config.getSubkeyValue(PersistenceProperties.DB_PORT, pd.getTableName());
+		ds.setPortNumbers(new int[] { Integer.parseInt(sqlPort) });
+		ds.setServerNames(new String[] { sqlHost });
 		ds.setUser(getUserName());
 		ds.setPassword(getPassword());
-		String tz = config==null?"UTC":config.getSubkeyValue(PersistenceProperties.MYSQL_TIMEZONE, pd.getTableName());
-		String sslModeS = config==null?"false":config.getSubkeyValue(PersistenceProperties.MYSQL_SSL, pd.getTableName());
+		String sslModeS = config==null?"true":config.getSubkeyValue(PersistenceProperties.PGSQL_SSL, pd.getTableName());
 		boolean sslMode = Boolean.parseBoolean(sslModeS);
 		try{
-			ds.setVerifyServerCertificate(false);
-			ds.setUseSSL(sslMode);
-			ds.setAutoReconnect(true);
-			ds.setAutoReconnectForPools(true);
-			ds.setServerTimezone(tz);
-		}catch(SQLException se){
-			logger.warn(Log.createFaultMessage("Error configuring MySQL driver auto-reconnect", se));
+			ds.setSsl(sslMode);
+			if(sslMode) {
+				ds.setSslmode("allow");
+			}
+		}catch(Exception ex) {
+			throw new RuntimeException(ex);
 		}
-		//for info purposes, create and log the connection string
-		String conn = "jdbc:mysql://"+sqlHost+":"+sqlPort+"/"+getDatabaseName()+"?ssl="+sslMode+"&serverTimezone="+tz;
-		logger.info("Connecting to: "+conn);
+		logger.info("Connecting to: jdbc:postgresql://{}:{}/{}?ssl={}", sqlHost, sqlPort, getDatabaseName(),sslMode);
 		return ds;
 	}
 	
@@ -164,10 +158,9 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 	protected Connection getConnection()throws PersistenceException{
 		Connection c=null;
 		try{
-			c=super.getConnection();	
-			((com.mysql.cj.jdbc.JdbcConnection)c).ping();
+			c=super.getConnection();
 		}catch(Exception se){
-			logger.warn("Error when getting a MySQL connection: "+se.getMessage()+", trying to reconnect.");
+			logger.warn("Error when getting a PGSQL connection: "+se.getMessage()+", trying to reconnect.");
 			try{
 				pool.cleanupPooledConnections();
 			}catch(Exception ex){/*ignored*/}
@@ -179,21 +172,19 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 
 	protected boolean columnExists(String column) throws PersistenceException, SQLException {
 		String tb = pd.getTableName();
-		String sql="SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE "
-				+ "table_schema='"+getDatabaseName()+"'"
-				+ " AND table_name='"+tb+
-				"' AND column_name='"+column+"'";
+		String sql="SELECT 1 FROM information_schema.columns WHERE "
+				+ "table_name='"+tb+"' AND column_name='"+column+"'";
 		return runCheck(sql);
 	}
 	
 	protected boolean tableExists() throws PersistenceException, SQLException {
 		String tb = pd.getTableName();
-		String sql="SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE "
-				+ "table_schema='"+getDatabaseName()+"'"
-				+ "AND table_name='"+tb+"'";
+		String sql="SELECT 1 FROM pg_tables WHERE "
+				+ "schemaname='public' "
+				+ "AND tablename='"+tb+"'";
 		return runCheck(sql);
 	}
-	
+
 	private boolean runCheck(String sql) throws SQLException, PersistenceException {
 		Connection conn=getConnection();
 		synchronized(conn){
