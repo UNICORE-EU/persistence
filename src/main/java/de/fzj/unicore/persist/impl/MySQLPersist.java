@@ -59,7 +59,7 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 
 	private static final Logger logger = Log.getLogger("unicore.persistence", MySQLPersist.class);
 
-	private String sqlHost, sqlPort, sqlUser, sqlPass, sqlType;
+	private String sqlHost, sqlUser, sqlPass, sqlType;
 
 	@Override
 	public List<String> getSQLCreateTable() throws PersistenceException, SQLException {
@@ -97,10 +97,19 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 		}
 		String tb=pd.getTableName();
 		if(sqlHost==null)sqlHost = config.getSubkeyValue(PersistenceProperties.DB_HOST, tb);
-		if(sqlPort==null)sqlPort = config.getSubkeyValue(PersistenceProperties.DB_PORT, tb);
-		connectionURL = "jdbc:mysql://"+sqlHost+":"+sqlPort+"/"+getDatabaseName()+"?autoReconnect=true";
+		connectionURL = "jdbc:mysql://"+sqlHost+":"+getDatabaseServerPort()+"/"+getDatabaseName()+"?autoReconnect=true";
 		logger.info("Connecting to: "+connectionURL);
 		return connectionURL;
+	}
+
+	@Override
+	protected int getDatabaseServerPort() {
+		String tb = pd.getTableName();
+		Integer port = config.getSubkeyIntValue(PersistenceProperties.DB_PORT, tb);
+		if(port==null) {
+			port = 3306;
+		}
+		return port;
 	}
 
 	@Override
@@ -133,8 +142,7 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 		MysqlConnectionPoolDataSource ds=new MysqlConnectionPoolDataSource();
 		ds.setDatabaseName(getDatabaseName());
 		sqlHost=config==null?"localhost":config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
-		sqlPort=config==null?"3306":config.getSubkeyValue(PersistenceProperties.DB_PORT, pd.getTableName());
-		ds.setPort(Integer.parseInt(sqlPort));
+		ds.setPort(getDatabaseServerPort());
 		ds.setServerName(sqlHost);
 		ds.setUser(getUserName());
 		ds.setPassword(getPassword());
@@ -151,8 +159,8 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 			logger.warn(Log.createFaultMessage("Error configuring MySQL driver auto-reconnect", se));
 		}
 		//for info purposes, create and log the connection string
-		String conn = "jdbc:mysql://"+sqlHost+":"+sqlPort+"/"+getDatabaseName()+"?ssl="+sslMode+"&serverTimezone="+tz;
-		logger.info("Connecting to: "+conn);
+		String conn = "jdbc:mysql://"+sqlHost+":"+getDatabaseServerPort()+"/"+getDatabaseName()+"?ssl="+sslMode+"&serverTimezone="+tz;
+		logger.info("Connecting to: {}", conn);
 		return ds;
 	}
 	

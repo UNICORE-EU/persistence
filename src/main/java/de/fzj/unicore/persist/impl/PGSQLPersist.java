@@ -58,7 +58,8 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 
 	private static final Logger logger = Log.getLogger("unicore.persistence", PGSQLPersist.class);
 
-	private String sqlHost, sqlPort, sqlUser, sqlPass;
+	private String sqlHost, sqlUser, sqlPass;
+	private int sqlPort;
 
 	@Override
 	public List<String> getSQLCreateTable() throws PersistenceException, SQLException {
@@ -95,8 +96,7 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 		}
 		String tb=pd.getTableName();
 		if(sqlHost==null)sqlHost = config.getSubkeyValue(PersistenceProperties.DB_HOST, tb);
-		if(sqlPort==null)sqlPort = config.getSubkeyValue(PersistenceProperties.DB_PORT, tb);
-		connectionURL = "jdbc:postgresql://"+sqlHost+":"+sqlPort+"/"+getDatabaseName();
+		connectionURL = "jdbc:postgresql://"+sqlHost+":"+getDatabaseServerPort()+"/"+getDatabaseName();
 		logger.info("Connecting to: "+connectionURL);
 		return connectionURL;
 	}
@@ -108,6 +108,16 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 			driver = "org.postgresql.Driver";
 		}
 		return driver;
+	}
+
+	@Override
+	protected int getDatabaseServerPort() {
+		String tb = pd.getTableName();
+		Integer port = config.getSubkeyIntValue(PersistenceProperties.DB_PORT, tb);
+		if(port==null) {
+			port = 5432;
+		}
+		return port;
 	}
 
 	@Override
@@ -131,8 +141,8 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 		PGConnectionPoolDataSource ds = new PGConnectionPoolDataSource();
 		ds.setDatabaseName(getDatabaseName());
 		sqlHost=config==null?"localhost":config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
-		sqlPort=config==null?"5432":config.getSubkeyValue(PersistenceProperties.DB_PORT, pd.getTableName());
-		ds.setPortNumbers(new int[] { Integer.parseInt(sqlPort) });
+		int port = getDatabaseServerPort();
+		ds.setPortNumbers(new int[] { port });
 		ds.setServerNames(new String[] { sqlHost });
 		ds.setUser(getUserName());
 		ds.setPassword(getPassword());

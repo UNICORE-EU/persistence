@@ -46,6 +46,7 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
 import org.apache.logging.log4j.Logger;
+import org.h2.engine.Constants;
 import org.h2.jdbcx.JdbcDataSource;
 
 import de.fzj.unicore.persist.PersistenceException;
@@ -212,6 +213,16 @@ public class H2Persist<T> extends PersistImpl<T>{
 
 		logger.info("Connecting to: "+connectionURL);
 		return connectionURL;
+	}
+
+	@Override
+	protected int getDatabaseServerPort() {
+		String tb = pd.getTableName();
+		Integer port = config.getSubkeyIntValue(PersistenceProperties.DB_PORT, tb);
+		if(port==null) {
+			port = Constants.DEFAULT_TCP_PORT;
+		}
+		return port;
 	}
 
 	@Override

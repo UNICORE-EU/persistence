@@ -154,8 +154,8 @@ public class PersistenceProperties extends PropertiesHelper{
 				setDescription("The database password."));
 		META.put(DB_HOST, new PropertyMD("localhost").setCanHaveSubkeys().
 				setDescription("The database host."));
-		META.put(DB_PORT, new PropertyMD("3306").setCanHaveSubkeys().
-				setDescription("The database port."));
+		META.put(DB_PORT, new PropertyMD().setInt().setCanHaveSubkeys().
+				setDescription("The database port. If not set, the default port for the chosen DB backend is used."));
 		META.put(DB_DIRECTORY, new PropertyMD().setCanHaveSubkeys().
 				setDescription("The directory for storing data (embedded DBs)."));
 		META.put(DB_LOCKS_DISTRIBUTED, new PropertyMD("false").setCanHaveSubkeys().setDeprecated().

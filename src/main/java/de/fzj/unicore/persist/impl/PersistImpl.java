@@ -451,6 +451,8 @@ public abstract class PersistImpl<T> extends SQL<T> {
 
 	protected abstract String createConnString();
 
+	protected abstract int getDatabaseServerPort();
+
 	protected abstract ConnectionPoolDataSource getConnectionPoolDataSource();
 
 	/**
