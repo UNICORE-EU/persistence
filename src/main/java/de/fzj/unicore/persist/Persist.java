@@ -165,9 +165,16 @@ public interface Persist<T> {
 	 */
 	public void write(T dao)throws PersistenceException;
 	
+
+	/**
+	 * delete the entry, but keep the lock.
+	 *
+	 * @param id of the entry to remove
+	 */
+	public void delete(String id)throws PersistenceException;
 	
 	/**
-	 * delete
+	 * delete the entry and remove its lock from {@link LockSupport}
 	 * 
 	 * @param id of the entry to remove
 	 */

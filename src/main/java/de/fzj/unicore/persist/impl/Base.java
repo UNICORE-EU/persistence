@@ -270,16 +270,23 @@ public abstract class Base<T> implements Persist<T>{
 		if(lock!=null)lock.unlock();
 	}
 
+	@Override
 	public void remove(String id)throws PersistenceException{
-		if(caching){
-			cache.invalidate(id);
-		}
 		try{
-			_remove(id);
+			delete(id);
 		}finally{
 			lockSupport.cleanup(id);
 		}
 	}
+	
+	@Override
+	public void delete(String id)throws PersistenceException{
+		if(caching){
+			cache.invalidate(id);
+		}
+		_remove(id);
+	}
+
 	
 	protected abstract void _remove(String id) throws PersistenceException;
 	
