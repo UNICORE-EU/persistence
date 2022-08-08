@@ -41,12 +41,12 @@ import java.util.List;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.postgresql.ds.PGConnectionPoolDataSource;
 
 import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.PersistenceProperties;
-import eu.unicore.util.Log;
 
 
 /**
@@ -56,7 +56,7 @@ import eu.unicore.util.Log;
  */
 public class PGSQLPersist<T> extends PersistImpl<T>{
 
-	private static final Logger logger = Log.getLogger("unicore.persistence", PGSQLPersist.class);
+	private static final Logger logger = LogManager.getLogger("unicore.persistence.PGSQLPersist");
 
 	private String sqlHost, sqlUser, sqlPass;
 	private int sqlPort;

@@ -6,11 +6,11 @@ import java.sql.SQLException;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.util.Pool;
-import eu.unicore.util.Log;
 
 /**
  * contains the logic for managing a connection pool. Based on work by 
@@ -20,8 +20,8 @@ import eu.unicore.util.Log;
  */
 public class ConnectionPool {
 
-	private static final Logger logger  = Log.getLogger("unicore.persistence", ConnectionPool.class);
-	
+	private static final Logger logger = LogManager.getLogger("unicore.persistence.ConnectionPool");
+
 	Pool pool;
 	
 	private Connection theConnection;

@@ -18,7 +18,10 @@
     <gson.version>2.9.1</gson.version>
     <guava.version>31.1-jre</guava.version>
     <commons-codec.version>1.15</commons-codec.version>
-    <seclib.version>5.4.1</seclib.version>
+    <jproperties.version>1.1.1</jproperties.version>
+    <log4j.version>2.18.0</log4j.version>
+	  
+    <!--seclib.version>5.4.1</seclib.version-->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -67,6 +70,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.11.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <version>${mysql.version}</version>
@@ -91,10 +100,25 @@
       <artifactId>h2</artifactId>
       <version>${h2.version}</version>
     </dependency>
-    <dependency>
+    <!--dependency>
       <groupId>eu.unicore.security</groupId>
       <artifactId>securityLibrary</artifactId>
       <version>${seclib.version}</version>
+    </dependency-->
+    <dependency>
+      <groupId>eu.unicore</groupId>
+      <artifactId>jproperties-conf</artifactId>
+      <version>${jproperties.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>

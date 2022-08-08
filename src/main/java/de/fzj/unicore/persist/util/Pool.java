@@ -25,9 +25,8 @@ import javax.sql.ConnectionEventListener;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import eu.unicore.util.Log;
 
 /**
  * A simple standalone JDBC connection pool manager.
@@ -49,7 +48,7 @@ import eu.unicore.util.Log;
  */
 public class Pool {
 
-	private static final Logger logger = Log.getLogger("unicore.persistence", Pool.class);
+	private static final Logger logger = LogManager.getLogger("unicore.persistence.Pool");
 
 	private ConnectionPoolDataSource dataSource;
 	private int maxConnections;

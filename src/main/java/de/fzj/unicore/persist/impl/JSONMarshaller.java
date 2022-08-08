@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.gson.Gson;
@@ -13,11 +14,10 @@ import com.google.gson.GsonBuilder;
 import de.fzj.unicore.persist.ObjectMarshaller;
 import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.util.GSONUtil;
-import eu.unicore.util.Log;
 
 public class JSONMarshaller<T> implements ObjectMarshaller<T> {
 
-	private static final Logger logger = Log.getLogger("unicore.persistence", JSONMarshaller.class);
+	private static final Logger logger = LogManager.getLogger("unicore.persistence.JSONMarshaller");
 
 	private final Gson gson;
 	private final Class<T>classOfT;

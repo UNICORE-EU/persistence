@@ -38,13 +38,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.persist.impl.ClassScanner;
 import de.fzj.unicore.persist.impl.H2Persist;
 import de.fzj.unicore.persist.impl.LockSupport;
 import de.fzj.unicore.persist.impl.PersistenceDescriptor;
-import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 
 
@@ -55,7 +55,7 @@ import eu.unicore.util.configuration.ConfigurationException;
  */
 public class PersistenceFactory {
 
-	private static final Logger logger=Log.getLogger(Log.PERSISTENCE,PersistenceFactory.class); 
+	private static final Logger logger = LogManager.getLogger("unicore.persistence,PersistenceFactory"); 
 	
 	private final PersistenceProperties config;
 	

@@ -41,13 +41,13 @@ import java.util.List;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 
 import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.PersistenceProperties;
-import eu.unicore.util.Log;
 
 
 /**
@@ -57,7 +57,7 @@ import eu.unicore.util.Log;
  */
 public class MySQLPersist<T> extends PersistImpl<T>{
 
-	private static final Logger logger = Log.getLogger("unicore.persistence", MySQLPersist.class);
+	private static final Logger logger = LogManager.getLogger("unicore.persistence.MySQLPersist");
 
 	private String sqlHost, sqlUser, sqlPass, sqlType;
 
@@ -156,7 +156,7 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 			ds.setAutoReconnectForPools(true);
 			ds.setServerTimezone(tz);
 		}catch(SQLException se){
-			logger.warn(Log.createFaultMessage("Error configuring MySQL driver auto-reconnect", se));
+			logger.warn("Error configuring MySQL driver auto-reconnect", se);
 		}
 		//for info purposes, create and log the connection string
 		String conn = "jdbc:mysql://"+sqlHost+":"+getDatabaseServerPort()+"/"+getDatabaseName()+"?ssl="+sslMode+"&serverTimezone="+tz;

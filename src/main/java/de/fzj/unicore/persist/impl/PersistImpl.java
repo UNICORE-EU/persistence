@@ -48,13 +48,13 @@ import java.util.Map;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.persist.DataVersionException;
 import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.PersistenceProperties;
 import de.fzj.unicore.persist.util.Pool;
-import eu.unicore.util.Log;
 
 
 /**
@@ -66,7 +66,7 @@ import eu.unicore.util.Log;
  */
 public abstract class PersistImpl<T> extends SQL<T> {
 
-	private static final Logger logger = Log.getLogger("unicore.persistence", PersistImpl.class);
+	private static final Logger logger = LogManager.getLogger("unicore.persistence.PersistImpl");
 
 	protected String databaseName=null;
 

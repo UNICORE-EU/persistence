@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.persist.impl.H2Persist;
-import eu.unicore.util.Log;
 import eu.unicore.util.configuration.DocumentationReferenceMeta;
 import eu.unicore.util.configuration.DocumentationReferencePrefix;
 import eu.unicore.util.configuration.PropertiesHelper;
@@ -21,7 +21,7 @@ import eu.unicore.util.configuration.PropertyMD;
  */
 public class PersistenceProperties extends PropertiesHelper{
 	
-	private static final Logger log = Log.getLogger(Log.CONFIGURATION, PersistenceProperties.class);
+	private static final Logger log = LogManager.getLogger("unicore.configuration.PersistenceProperties"); 
 	
 	@DocumentationReferencePrefix
 	public static final String PREFIX="persistence.";

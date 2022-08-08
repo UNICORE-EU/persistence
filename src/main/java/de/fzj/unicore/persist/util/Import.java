@@ -16,7 +16,6 @@ import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.PersistenceFactory;
 import de.fzj.unicore.persist.PersistenceProperties;
 import de.fzj.unicore.persist.impl.PersistenceDescriptor;
-import eu.unicore.util.Log;
 
 /**
  * Exports a database to JSON<br/>
@@ -75,7 +74,7 @@ public class Import {
 				}
 				catch(Exception ex){
 					errors++;
-					System.out.println(Log.createFaultMessage("ERROR:",ex));
+					System.out.println("ERROR: " + ex);
 				}
 			}
 		}
