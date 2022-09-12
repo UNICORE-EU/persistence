@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.sql.ConnectionPoolDataSource;
-import javax.sql.DataSource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -76,7 +75,7 @@ public class H2Persist<T> extends PersistImpl<T>{
 	static{
 		final Runnable r = new Runnable(){
 			public void run(){
-				logger.debug("Will reset H2 caches every <"+cacheCleanupPeriod/60000+"> minutes.");
+				logger.debug("Will reset H2 caches every <{}> minutes.", cacheCleanupPeriod/60000);
 				while(true){
 					try{
 						Thread.sleep(cacheCleanupPeriod);
@@ -97,7 +96,7 @@ public class H2Persist<T> extends PersistImpl<T>{
 	public H2Persist(){}
 
 	@Override
-	public void init()throws PersistenceException{
+	public void init()throws PersistenceException, SQLException {
 		super.init();
 		if(config==null)return;
 		resetCache();
@@ -105,24 +104,19 @@ public class H2Persist<T> extends PersistImpl<T>{
 	}
 
 	@Override
-	public void shutdown() throws PersistenceException {
+	public void shutdown() throws PersistenceException, SQLException {
 		instances.remove(this);
 		super.shutdown();
 	}
 	
-	protected void resetCache() throws PersistenceException {
-		Connection conn = getConnection();
-		synchronized (conn) {
-			try(Statement s = conn.createStatement()){
-				String cacheSize = config.getSubkeyValue(PersistenceProperties.H2_CACHESIZE, pd.getTableName());
-				s.execute("SET CACHE_SIZE "+cacheSize);
-				logger.debug("Set H2 cache size to "+cacheSize+" kb.");
-			}
-			catch(SQLException ex){
-				logger.error("Error initing H2 database",ex);
-			}
-			finally{
-				disposeConnection(conn);
+	protected void resetCache() throws PersistenceException, SQLException {
+		try(Connection conn = getConnection()){
+			synchronized (conn) {
+				try(Statement s = conn.createStatement()){
+					String cacheSize = config.getSubkeyValue(PersistenceProperties.H2_CACHESIZE, pd.getTableName());
+					s.execute("SET CACHE_SIZE "+cacheSize);
+					logger.debug("Set H2 cache size to {} kb.", cacheSize);
+				}
 			}
 		}
 	}
@@ -165,8 +159,7 @@ public class H2Persist<T> extends PersistImpl<T>{
 		this.serverMode = serverMode;
 	}
 
-	@Override
-	protected synchronized String createConnString(){
+	private String createConnString(){
 		if(connectionURL!=null){
 			return connectionURL;
 		}
@@ -216,17 +209,12 @@ public class H2Persist<T> extends PersistImpl<T>{
 	}
 
 	@Override
-	protected int getDatabaseServerPort() {
-		String tb = pd.getTableName();
-		Integer port = config.getSubkeyIntValue(PersistenceProperties.DB_PORT, tb);
-		if(port==null) {
-			port = Constants.DEFAULT_TCP_PORT;
-		}
-		return port;
+	protected int getDefaultPort() {
+		return  Constants.DEFAULT_TCP_PORT;
 	}
 
 	@Override
-	protected String getDriverName(){
+	protected String getDefaultDriverName(){
 		return "org.h2.Driver";
 	}
 
@@ -237,11 +225,6 @@ public class H2Persist<T> extends PersistImpl<T>{
 		ds.setUser(getUserName());
 		ds.setPassword(getPassword());
 		return ds;
-	}
-
-	@Override
-	protected DataSource getDataSource(){
-		return null;
 	}
 
 	@Override

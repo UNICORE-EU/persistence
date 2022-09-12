@@ -8,7 +8,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.PersistenceProperties;
 
 
@@ -51,7 +50,7 @@ public class TestH2PersistServerMode {
 	int size = 100;
 	
 	@Test
-	public void perfTest()throws PersistenceException{
+	public void perfTest()throws Exception{
 		System.out.println("\n\n**** Running test with numInstances="+numberOfInstances+", data size="+size);
 		createPersist();
 		p.setDaoClass(Dao1.class);
@@ -94,7 +93,7 @@ public class TestH2PersistServerMode {
 		
 	}
 
-	protected void readSomeRandomEntries(int numberOfInstances)throws PersistenceException{
+	protected void readSomeRandomEntries(int numberOfInstances)throws Exception{
 		for(int i=0;i<50;i++){
 			Dao1 e=p.read(String.valueOf(rand.nextInt(numberOfInstances)));
 			assert e!=null;

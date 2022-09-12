@@ -32,7 +32,7 @@
 
 package de.fzj.unicore.persist.impl;
 
-import java.io.IOException;
+import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
@@ -87,7 +87,7 @@ public abstract class Base<T> implements Persist<T>{
 		this.pd=pd;
 	}
 
-	public void init()throws PersistenceException{
+	public void init()throws PersistenceException, SQLException {
 		if(pd==null)pd=PersistenceDescriptor.get(daoClass);
 		String table=pd.getTableName();
 		try {
@@ -155,7 +155,7 @@ public abstract class Base<T> implements Persist<T>{
 	}
 
 
-	public T getForUpdate(String id)throws PersistenceException,InterruptedException{
+	public T getForUpdate(String id)throws PersistenceException, SQLException, InterruptedException{
 		try{
 			return getForUpdate(id,Long.MAX_VALUE,TimeUnit.MILLISECONDS);
 		}catch(TimeoutException cannotOccur){
@@ -171,7 +171,7 @@ public abstract class Base<T> implements Persist<T>{
 		}
 	}
 
-	public T getForUpdate(String id, long timeout, TimeUnit unit)throws PersistenceException, TimeoutException, InterruptedException{
+	public T getForUpdate(String id, long timeout, TimeUnit unit)throws PersistenceException, SQLException, TimeoutException, InterruptedException{
 		Lock lock=lockSupport.getOrCreateLock(id);
 		T result=null;
 		if(lock.tryLock(timeout, unit)){
@@ -190,7 +190,7 @@ public abstract class Base<T> implements Persist<T>{
 		}
 	}
 
-	public T tryGetForUpdate(String id)throws PersistenceException{
+	public T tryGetForUpdate(String id)throws PersistenceException, SQLException {
 		Lock lock=lockSupport.getOrCreateLock(id);
 		T result=null;
 		if(lock.tryLock()){
@@ -213,17 +213,13 @@ public abstract class Base<T> implements Persist<T>{
 	 * @return
 	 * @throws PersistenceException
 	 */
-	public T read(String id)throws PersistenceException {
+	public T read(String id)throws PersistenceException, SQLException {
 		T result=null; 
 		if(caching){
 			T element=cache.getIfPresent(id);
 			if(element!=null){
 				cacheHits++;
-				try{
-					return copy(element);
-				}catch(IOException ex){
-					throw new PersistenceException(makeErrorMessage(id, ex));
-				}
+				return copy(element);
 			}
 		}
 		result = _read(id);
@@ -235,14 +231,14 @@ public abstract class Base<T> implements Persist<T>{
 		return result;
 	}
 	
-	protected abstract T _read(String id) throws PersistenceException;
+	protected abstract T _read(String id) throws PersistenceException, SQLException;
 
-	public void write(T dao)throws PersistenceException,IllegalStateException{
+	public void write(T dao)throws PersistenceException, SQLException, IllegalStateException {
 		String id=pd.getID(dao);
 		Lock lock=lockSupport.getLockIfExists(id);
 		if(lock!=null && !lock.tryLock())throw new IllegalStateException("No write permission has been acquired!");
 		try{
-			if(logger.isDebugEnabled())logger.debug("["+pd.getTableName()+"] Persisting <"+id+">");
+			logger.debug("[{}] Persisting <{}>", pd.getTableName(), id);
 			_write(dao, id);
 			if(caching){
 				try{
@@ -262,7 +258,7 @@ public abstract class Base<T> implements Persist<T>{
 		}
 	}
 
-	protected abstract void _write(T dao, String id)throws PersistenceException;
+	protected abstract void _write(T dao, String id)throws PersistenceException, SQLException;
 
 	public void unlock(T dao)throws PersistenceException{
 		String id=pd.getID(dao);
@@ -271,7 +267,7 @@ public abstract class Base<T> implements Persist<T>{
 	}
 
 	@Override
-	public void remove(String id)throws PersistenceException{
+	public void remove(String id)throws PersistenceException, SQLException {
 		try{
 			delete(id);
 		}finally{
@@ -280,7 +276,7 @@ public abstract class Base<T> implements Persist<T>{
 	}
 	
 	@Override
-	public void delete(String id)throws PersistenceException{
+	public void delete(String id)throws PersistenceException, SQLException{
 		if(caching){
 			cache.invalidate(id);
 		}
@@ -288,9 +284,9 @@ public abstract class Base<T> implements Persist<T>{
 	}
 
 	
-	protected abstract void _remove(String id) throws PersistenceException;
+	protected abstract void _remove(String id) throws PersistenceException, SQLException;
 	
-	public void removeAll()throws PersistenceException{
+	public void removeAll()throws PersistenceException, SQLException{
 		if(caching){
 			cache.invalidateAll();
 		}
@@ -301,7 +297,7 @@ public abstract class Base<T> implements Persist<T>{
 		}
 	}
 
-	protected abstract void _removeAll() throws PersistenceException;
+	protected abstract void _removeAll() throws PersistenceException, SQLException;
 
 	@SuppressWarnings("unchecked")
 	public void setDaoClass(Class<?>daoClass){
@@ -319,7 +315,7 @@ public abstract class Base<T> implements Persist<T>{
 	 * @param obj
 	 * @return a true copy of obj
 	 */
-	protected T copy(T obj)throws IOException, PersistenceException{
+	protected T copy(T obj) {
 		return marshaller.deserialize(marshaller.serialize(obj));
 	}
 

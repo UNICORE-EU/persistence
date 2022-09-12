@@ -9,7 +9,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
-import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.PersistenceProperties;
 
 
@@ -41,7 +40,7 @@ public class TestPersistImplementations {
 	}
 	
 	@Test
-	public void testSerializableWrapper()throws PersistenceException, 
+	public void testSerializableWrapper()throws Exception, 
 	InstantiationException, IllegalAccessException, TimeoutException, InterruptedException{
 		H2Persist<Dao5>p=new H2Persist<Dao5>();
 		PersistenceProperties config=new PersistenceProperties();

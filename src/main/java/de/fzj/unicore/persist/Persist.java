@@ -32,6 +32,7 @@
 
 package de.fzj.unicore.persist;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -60,7 +61,7 @@ public interface Persist<T> {
 	 * @param id
 	 * @return T
 	 */
-	public T read(String id)throws PersistenceException;
+	public T read(String id)throws PersistenceException, SQLException;
 	
 	/**
 	 * Get an object from the persistence layer and aquire a write lock<br/>
@@ -91,7 +92,7 @@ public interface Persist<T> {
 	 * @throws PersistenceException - if errors related to the storage occur
 	 * @throws InterruptedException - if the current thread is interrupted while waiting for lock aquisition
 	 */
-	public T getForUpdate(String id)throws PersistenceException, InterruptedException;
+	public T getForUpdate(String id)throws PersistenceException, SQLException, InterruptedException;
 	
 	/**
 	 * get an object from the persistence layer and aquire a write lock. 
@@ -124,7 +125,7 @@ public interface Persist<T> {
 	 * @throws TimeoutException - if the lock cannot be aquired in the given timeout 
 	 * @throws InterruptedException - if the current thread is interrupted while waiting for lock aquisition
 	 */
-	public T getForUpdate(String id,long timeout, TimeUnit unit)throws PersistenceException, TimeoutException,InterruptedException;
+	public T getForUpdate(String id,long timeout, TimeUnit unit)throws PersistenceException, SQLException, TimeoutException, InterruptedException;
 	
 	/**
 	 * get an object from the persistence layer and aquire a write lock. 
@@ -152,7 +153,7 @@ public interface Persist<T> {
 	 * @return the requested object , or <code>null</code> if it does not exist
 	 * @throws PersistenceException - if errors related to the storage occur
 	 */
-	public T tryGetForUpdate(String id)throws PersistenceException, TimeoutException,InterruptedException;
+	public T tryGetForUpdate(String id)throws PersistenceException, SQLException, TimeoutException,InterruptedException;
 	
 	public void lock(String id, long timeout, TimeUnit unit)throws TimeoutException, InterruptedException;
 	
@@ -163,7 +164,7 @@ public interface Persist<T> {
 	 * 
 	 * @param dao
 	 */
-	public void write(T dao)throws PersistenceException;
+	public void write(T dao)throws PersistenceException, SQLException;
 	
 
 	/**
@@ -171,24 +172,24 @@ public interface Persist<T> {
 	 *
 	 * @param id of the entry to remove
 	 */
-	public void delete(String id)throws PersistenceException;
+	public void delete(String id)throws PersistenceException, SQLException;
 	
 	/**
 	 * delete the entry and remove its lock from {@link LockSupport}
 	 * 
 	 * @param id of the entry to remove
 	 */
-	public void remove(String id)throws PersistenceException;
+	public void remove(String id)throws PersistenceException, SQLException;
 	
 	/**
 	 * delete all entries
 	 */
-	public void removeAll()throws PersistenceException;
+	public void removeAll()throws PersistenceException, SQLException;
 	
 	/**
 	 * get all IDs
 	 */
-	public List<String> getIDs()throws PersistenceException;
+	public List<String> getIDs()throws PersistenceException, SQLException;
 	
 	/**
 	 * get a list of dao IDs where a column has a certain value
@@ -196,7 +197,7 @@ public interface Persist<T> {
 	 * @param column - the column name
 	 * @param value - the value
 	 */
-	public List<String> getIDs(String column, Object value)throws PersistenceException;
+	public List<String> getIDs(String column, Object value)throws PersistenceException, SQLException;
 	
 	
 	/**
@@ -206,7 +207,7 @@ public interface Persist<T> {
 	 * @param column - the column name
 	 * @param values - values to match
 	 */
-	public List<String> findIDs(boolean orMode, String column, String... values)throws PersistenceException;
+	public List<String> findIDs(boolean orMode, String column, String... values)throws PersistenceException, SQLException;
 	
 	/**
 	 * get a list of dao IDs where a column matches certain values (i.e. using SQL 'LIKE')
@@ -214,7 +215,7 @@ public interface Persist<T> {
 	 * @param column - the column name
 	 * @param values - if giving more than one value, the search uses AND to combine
 	 */
-	public List<String> findIDs(String column, String... values)throws PersistenceException;
+	public List<String> findIDs(String column, String... values)throws PersistenceException, SQLException;
 	
 	/**
 	 * get a map containing the values of one particular column
@@ -222,7 +223,7 @@ public interface Persist<T> {
 	 * @param column - the column name
 	 * @return a Map<String,String> of column values keyed with the ID
 	 */
-	public Map<String,String> getColumnValues(String column)throws PersistenceException;
+	public Map<String,String> getColumnValues(String column)throws PersistenceException, SQLException;
 	
 	/**
 	 * get the number of rows
@@ -230,7 +231,7 @@ public interface Persist<T> {
 	 * @return the number of rows
 	 * @throws PersistenceException
 	 */
-	public int getRowCount()throws PersistenceException;
+	public int getRowCount()throws PersistenceException, SQLException;
 	
 	/**
 	 * get the number of rows where a column has a certain value
@@ -240,7 +241,7 @@ public interface Persist<T> {
 	 * @return row count
 	 * @throws PersistenceException
 	 */
-	public int getRowCount(String column, Object value)throws PersistenceException;
+	public int getRowCount(String column, Object value)throws PersistenceException, SQLException;
 	
 	
 	//lifecycle methods
@@ -261,9 +262,9 @@ public interface Persist<T> {
 	 */
 	public void setLockSupport(LockSupport locks);
 	
-	public void init() throws PersistenceException;
+	public void init() throws PersistenceException, SQLException;
 	
-	public void shutdown()throws PersistenceException;
+	public void shutdown()throws PersistenceException, SQLException;
 	
 	/**
 	 * flush all caches and write outstanding things to physical storage

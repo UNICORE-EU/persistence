@@ -3,6 +3,7 @@ package de.fzj.unicore.persist.util;
 import java.io.FileInputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -83,7 +84,7 @@ public class Export {
 		System.out.println("Done, "+errors+" errors occured.");
 	}
 
-    public void shutdown() throws PersistenceException {
+    public void shutdown() throws PersistenceException, SQLException {
     	input.shutdown();
     }
     

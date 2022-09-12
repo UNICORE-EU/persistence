@@ -32,8 +32,6 @@
 
 package de.fzj.unicore.persist.impl;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -46,12 +44,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.sql.ConnectionPoolDataSource;
-import javax.sql.DataSource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.persist.DataVersionException;
 import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.PersistenceProperties;
 import de.fzj.unicore.persist.util.Pool;
@@ -70,20 +66,22 @@ public abstract class PersistImpl<T> extends SQL<T> {
 
 	protected String databaseName=null;
 
+	// only for logging purposes
+	protected String connectionURL = "";
+
 	public PersistImpl(){
 		super();
 	}
 
-	public void init()throws PersistenceException{
+	public void init()throws PersistenceException, SQLException {
 		super.init();
 		String table=pd.getTableName();
 		try {
-
 			int maxConn=config==null? 1 :
 				Integer.parseInt(config.getSubkeyValue(PersistenceProperties.DB_POOL_MAXSIZE,table));
 			int timeout=config==null ? Integer.MAX_VALUE:
 				Integer.parseInt(config.getSubkeyValue(PersistenceProperties.DB_POOL_TIMEOUT, table));
-			setupConnectionPool(getConnectionPoolDataSource(),maxConn,timeout,getDataSource());
+			setupConnectionPool(getConnectionPoolDataSource(),maxConn,timeout);
 
 			createTables();
 
@@ -97,186 +95,120 @@ public abstract class PersistImpl<T> extends SQL<T> {
 
 	}
 
-	public void shutdown()throws PersistenceException{
+	public void shutdown()throws PersistenceException, SQLException {
 		flush();
-		Statement s=null;
-		Connection conn=null;
-		try{
-			conn=getConnection();
-			synchronized(conn){
-				try{
-					String sql=getSQLShutdown();
-					if(sql!=null){
-						s=conn.createStatement();
-						s.execute(sql);
-					}
-				}catch(Exception e){
+		try {
+			_execute(getSQLShutdown());
+		}
+		catch(Exception e){
 					logger.warn("Shutting down: "+e.getMessage());
-				}
-				finally{
-					try{if(s!=null)s.close();}catch(Exception e){}
-				}
-			}	
 		}finally{
-			if(conn!=null){
-				try{
-					disposeConnection(conn);
-					if(!conn.isClosed())conn.close();
-				}catch(Exception ex){}
-			}
 			shutdownPool();
 		}
 	}
 
-	public List<String> getIDs()throws PersistenceException{
-		List<String>result=new ArrayList<String>();
-		String sql=getSQLSelectAllKeys();
-
-		Connection conn=null;
-		try{
-			conn=getConnection();
+	public List<String> getIDs()throws PersistenceException, SQLException {
+		List<String>result=new ArrayList<>();
+		try(Connection conn = getConnection()){
 			synchronized (conn) {
-				Statement s=null;
-				try {
-					s=conn.createStatement();
-					ResultSet rs=s.executeQuery(sql);
+				try (Statement s = conn.createStatement()){
+					ResultSet rs = s.executeQuery(getSQLSelectAllKeys());
 					while(rs.next()){
 						result.add(rs.getString(1));
 					}
-				} catch (Exception e) {
-					throw new PersistenceException(e);
-				}
-				finally{
-					if(s!=null)try{	s.close();}catch(Exception e){logger.error("",e);}
 				}
 			}
 			return result;
-		}finally{
-			disposeConnection(conn);
 		}
 	}
 
-	public List<String> getIDs(String column, Object value)throws PersistenceException{
-		List<String>result=new ArrayList<String>();
-		Connection conn=null;
-		conn=getConnection();
-		synchronized (conn) {
-			String sql=getSQLSelectKeys(column,value);
-			try(PreparedStatement ps = conn.prepareStatement(sql)){
-				ps.setString(1, String.valueOf(value));
-				ResultSet rs=ps.executeQuery();
-				while(rs.next()){
-					result.add(rs.getString(1));
+	public List<String> getIDs(String column, Object value)throws PersistenceException, SQLException {
+		List<String>result=new ArrayList<>();
+		try (Connection conn = getConnection()){
+			synchronized (conn) {
+				try(PreparedStatement ps = conn.prepareStatement(getSQLSelectKeys(column,value))){
+					ps.setString(1, String.valueOf(value));
+					ResultSet rs=ps.executeQuery();
+					while(rs.next()){
+						result.add(rs.getString(1));
+					}
 				}
-			} catch (Exception e) {
-				throw new PersistenceException(e);
-			}
-			finally{
-				disposeConnection(conn);
 			}
 		}
 		return result;
 	}
 
-	public List<String> findIDs(boolean orMode, String column, String... values)throws PersistenceException{
-		List<String>result=new ArrayList<String>();
-		Connection conn=null;
-		conn=getConnection();
-		synchronized (conn) {
-			String sql=getSQLFuzzySelect(column, values.length, orMode);
-			try(PreparedStatement ps = conn.prepareStatement(sql)){
-				int i=1;
-				for(String val: values){
-					ps.setString(i, "%"+val+"%");
-					i++;
+	public List<String> findIDs(boolean orMode, String column, String... values)throws PersistenceException, SQLException {
+		List<String>result=new ArrayList<>();
+		try(Connection conn = getConnection()){
+			synchronized (conn) {
+				String sql = getSQLFuzzySelect(column, values.length, orMode);
+				try(PreparedStatement ps = conn.prepareStatement(sql)){
+					int i=1;
+					for(String val: values){
+						ps.setString(i, "%"+val+"%");
+						i++;
+					}
+					ResultSet rs=ps.executeQuery();
+					while(rs.next()){
+						result.add(rs.getString(1));
+					}
 				}
-				ResultSet rs=ps.executeQuery();
-				while(rs.next()){
-					result.add(rs.getString(1));
-				}
-			} catch (Exception e) {
-				throw new PersistenceException(e);
 			}
-			finally{
-				disposeConnection(conn);
-			}
+			return result;
 		}
-		return result;
 	}
 
-	public List<String> findIDs(String column, String... values)throws PersistenceException{
+	public List<String> findIDs(String column, String... values)throws PersistenceException, SQLException {
 		return findIDs(false, column, values);
 	}
 
-	public int getRowCount(String column, Object value)throws PersistenceException{
-		Connection conn=getConnection();
-		synchronized (conn) {
-			Statement s=null;
-			try {
-				s=conn.createStatement();
-				String sql=getSQLRowCount(column,value);
-				ResultSet rs=s.executeQuery(sql);
-				if(rs.next()){
-					return rs.getInt(1);
+	public int getRowCount(String column, Object value) throws SQLException {
+		try(Connection conn = getConnection()){
+			synchronized (conn) {
+				try (Statement s = conn.createStatement()){
+					String sql=getSQLRowCount(column,value);
+					ResultSet rs=s.executeQuery(sql);
+					if(rs.next()){
+						return rs.getInt(1);
+					}
 				}
-			} catch (Exception e) {
-				throw new PersistenceException(e);
 			}
-			finally{
-				if(s!=null)try{s.close();}catch(Exception e){logger.error("",e);}
-				disposeConnection(conn);
-			}
+			return -1;
 		}
-		return -1;
 	}
 
-	public int getRowCount()throws PersistenceException{
-		Connection conn=getConnection();
-		synchronized (conn) {
-			Statement s=null;
-			try {
-				s=conn.createStatement();
-				String sql=getSQLRowCount();
-				ResultSet rs=s.executeQuery(sql);
-				if(rs.next()){
-					return rs.getInt(1);
+	public int getRowCount()throws SQLException {
+		try(Connection conn = getConnection()){
+			synchronized (conn) {
+				try (Statement s = conn.createStatement()){
+					String sql=getSQLRowCount();
+					ResultSet rs=s.executeQuery(sql);
+					if(rs.next()){
+						return rs.getInt(1);
+					}
 				}
-			} catch (Exception e) {
-				throw new PersistenceException(e);
 			}
-			finally{
-				if(s!=null)try{s.close();}catch(Exception e){logger.error("",e);}
-				disposeConnection(conn);
-			}
+			return -1;
 		}
-		return -1;
 	}
 
-	public Map<String,String> getColumnValues(String column)throws PersistenceException{
-		Map<String,String>result=new HashMap<String,String>();
-		Statement s=null;
-		Connection conn=getConnection();
-		String select=null;
-		synchronized (conn) {
-			try{
-				select=getSQLSelectColumn(column);
-				s=conn.createStatement();
-				ResultSet rs=s.executeQuery(select);
-				while(rs.next()){
-					String key=rs.getString(1);
-					String value=rs.getString(2);
-					result.put(key, value);
+	public Map<String,String> getColumnValues(String column)throws SQLException {
+		Map<String,String>result=new HashMap<>();
+		try(Connection conn = getConnection()){
+			synchronized (conn) {
+				try(Statement s = conn.createStatement()){
+					String select=getSQLSelectColumn(column);
+					ResultSet rs=s.executeQuery(select);
+					while(rs.next()){
+						String key=rs.getString(1);
+						String value=rs.getString(2);
+						result.put(key, value);
+					}
 				}
-			}catch(Exception e){
-				logger.error("Error executing: "+select,e);
-				throw new PersistenceException(e);
 			}
-			finally{
-				if(s!=null)try{s.close();}catch(Exception e){logger.error("",e);}
-				disposeConnection(conn);
-			}
+			return result;
 		}
-		return result;
 	}
 
 	/**
@@ -286,180 +218,176 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	 * @return
 	 * @throws PersistenceException
 	 */
-	protected T _read(String id)throws PersistenceException {
+	protected T _read(String id)throws PersistenceException, SQLException {
 		T result=null; 
-		Connection conn=getConnection();
-		synchronized(conn){
-			try(PreparedStatement ps=conn.prepareStatement(getSQLRead())){
-				ps.setString(1, id);
-				ResultSet rs = ps.executeQuery();
-				while(rs.next()){
-					result=marshaller.decode(rs.getString(1));
+		try(Connection conn = getConnection()){
+			synchronized(conn){
+				try(PreparedStatement ps=conn.prepareStatement(getSQLRead())){
+					ps.setString(1, id);
+					ResultSet rs = ps.executeQuery();
+					while(rs.next()){
+						result=marshaller.decode(rs.getString(1));
+					}
 				}
-			}catch(DataVersionException d){
-				throw d;
-			}catch(Exception e){
-				String msg=makeErrorMessage(id, e);
-				throw new PersistenceException(msg,e);
 			}
-			finally{
-				disposeConnection(conn);
-			}
+			return result;
 		}
-		return result;
 	}
 
-	protected void _write(T dao, String id)throws PersistenceException {
-		PreparedStatement ps=null;
-		Connection conn=getConnection();
-		synchronized (conn) {
-			try(Statement s=conn.createStatement()){
-				String exists=getSQLExists(id);
-				if(s.executeQuery(exists).next()){
-					//update
-					ps=conn.prepareStatement(getSQLUpdate());
-					parametrizePSUpdate(ps,id, dao);
-					ps.executeUpdate();	
-					ps.clearParameters();
+	protected void _write(T dao, String id)throws PersistenceException, SQLException {
+		try(Connection conn = getConnection()){
+			synchronized (conn) {
+				try(Statement s=conn.createStatement()){
+					PreparedStatement ps = null;
+					String exists=getSQLExists(id);
+					if(s.executeQuery(exists).next()){
+						//update
+						ps=conn.prepareStatement(getSQLUpdate());
+						parametrizePSUpdate(ps,id, dao);
+						ps.executeUpdate();
+						ps.clearParameters();
+					}
+					else{
+						//insert
+						ps=conn.prepareStatement(getSQLInsert());
+						parametrizePSInsert(ps, id, dao);
+						ps.executeUpdate();
+						ps.clearParameters();
+					}
 				}
-				else{
-					//insert
-					ps=conn.prepareStatement(getSQLInsert());
-					parametrizePSInsert(ps, id, dao);
-					ps.executeUpdate();
-					ps.clearParameters();
+			}
+		}
+	}
+
+	protected void _remove(String id) throws PersistenceException, SQLException {
+		_executeUpdate(getSQLDelete(id));
+	}
+
+	protected void _removeAll()throws PersistenceException, SQLException {
+		_executeUpdate(getSQLDeleteAll());
+	}
+
+	protected void _execute(String sql) throws SQLException {
+		try(Connection conn = getConnection()){
+			synchronized (conn) {
+				try(Statement s = conn.createStatement()){
+					s.execute(sql);
 				}
-			}catch(Exception e){
-				logger.error(e);
-				throw new PersistenceException(e);
-			}
-			finally{
-				if(ps!=null)try{ps.close();}catch(Exception e){logger.error("",e);}
-				disposeConnection(conn);
 			}
 		}
 	}
-
-	protected void _remove(String id) throws PersistenceException {
-		Connection conn=getConnection();
-		synchronized (conn) {
-			try(Statement s = conn.createStatement()){
-				String delete=getSQLDelete(id);
-				s.executeUpdate(delete);
-			}catch(Exception e){
-				throw new PersistenceException(e);
-			}
-			finally{
-				disposeConnection(conn);
+	
+	protected void _executeUpdate(String sql) throws SQLException {
+		try(Connection conn = getConnection()){
+			synchronized (conn) {
+				try(Statement s = conn.createStatement()){
+					s.executeUpdate(sql);
+				}
 			}
 		}
 	}
-
-	protected void _removeAll()throws PersistenceException{
-		Connection conn=getConnection();
-		synchronized (conn) {
-			try(Statement s = conn.createStatement()){
-				String delete=getSQLDeleteAll();
-				s.executeUpdate(delete);
-			}catch(Exception e){
-				throw new PersistenceException(e);
-			}
-			finally{
-				disposeConnection(conn);
-			}
-		}
-	}
-
-	public void purge(){
+		
+	public void purge() {
 		try{
 			dropTables();
-		}catch(PersistenceException pe){
-			logger.info("There was an error purging data",pe);
+		}catch(Exception pe){
+			logger.info("There was an error purging data", pe);
 		}
 	}
 
 	/**
 	 * create a true copy of the supplied object using serialisation.<br/>
-	 * Careful: this will aquire a lock on the object due to a 
-	 * strange Java bug, see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6178997
-	 * @param obj
 	 * @return a true copy of obj
 	 */
-	protected T copy(T obj)throws IOException, PersistenceException{
+	protected T copy(T obj) {
 		return marshaller.deserialize(marshaller.serialize(obj));
 	}
 
 	protected void createTables()throws PersistenceException, SQLException {
-		List<String> createCmds = getSQLCreateTable();
-		Connection conn=getConnection();
-		synchronized (conn) {
-			try(Statement s=conn.createStatement()){
-				for(String sql: createCmds){
-					try{
-						s.execute(sql);
-					}catch(SQLException e){
-						logger.error(e);
+		List<String> cmds = getSQLCreateTable();
+		try(Connection conn = getConnection()){
+			synchronized (conn) {
+				try(Statement s = conn.createStatement()){
+					for(String sql: cmds){
+						try{
+							s.execute(sql);
+						}catch(SQLException e){
+							logger.error(e);
+						}
 					}
 				}
-			} finally{
-				disposeConnection(conn);
 			}
 		}
 	}
 
 
-	public void dropTables()throws PersistenceException{
-		Connection conn=getConnection();
-		synchronized (conn) {
-			try(Statement s=conn.createStatement()){
-				s.execute(getSQLDropTable());
-			}catch(Exception e){
-				//OK, probably tables did not exist...
-			}
-			finally{
-				disposeConnection(conn);
-			}
+	public void dropTables()throws SQLException {
+		try{
+			_execute( getSQLDropTable());
+		}catch(SQLException e){
+			//OK, probably tables did not exist...
 		}
 	}
 
-	public void parametrizePSInsert(PreparedStatement psInsert, String id, T dao)throws IOException,SQLException,InvocationTargetException,IllegalAccessException,PersistenceException{
+	public void parametrizePSInsert(PreparedStatement psInsert, String id, T dao)throws SQLException, PersistenceException{
 		psInsert.setString(1, id);
 		String base64=marshaller.encode(dao);
 		psInsert.setString(2, base64);
 		psInsert.setString(3, getTimeStamp());
 		int i=4;
+		Object val = null;
 		for(ColumnDescriptor c: pd.getColumns()){
-			Object val=c.getMethod().invoke(dao, (Object[])null);
+			try {
+				val=c.getMethod().invoke(dao, (Object[])null);
+			}catch(Exception ex) {
+				throw new PersistenceException(ex);
+			}
 			psInsert.setString(i, val!=null?val.toString():null);
 			i++;
 		}
 	}
 
 	public void parametrizePSUpdate(PreparedStatement psUpdate, String id, T dao)
-			throws IOException,SQLException,InvocationTargetException,IllegalAccessException, PersistenceException{
+			throws PersistenceException, SQLException {
 		String base64=marshaller.encode(dao);
 		psUpdate.setString(1, base64);
-
 		int i=2;
+		Object val=null;
 		for(ColumnDescriptor c: pd.getColumns()){
-			Object val=c.getMethod().invoke(dao, (Object[])null);
+			try {
+				val=c.getMethod().invoke(dao, (Object[])null);
+			}catch(Exception ex) {
+				throw new PersistenceException(ex);
+			}
 			psUpdate.setString(i, val!=null?val.toString():null);
 			i++;
 		}
 		psUpdate.setString(i, id);
 	}
 
-	protected abstract String createConnString();
+	protected int getDatabaseServerPort() {
+		String tb = pd.getTableName();
+		Integer port = config.getSubkeyIntValue(PersistenceProperties.DB_PORT, tb);
+		if(port==null) {
+			port = getDefaultPort();
+		}
+		return port;
+	}
 
-	protected abstract int getDatabaseServerPort();
+	protected abstract int getDefaultPort();
+
+	@Override
+	protected String getDriverName(){
+		String driver=config!=null?config.getSubkeyValue(PersistenceProperties.DB_DRIVER, pd.getTableName()):"com.mysql.cj.jdbc.Driver";
+		if(driver==null){
+			driver = getDefaultDriverName();
+		}
+		return driver;
+	}
+
+	protected abstract String getDefaultDriverName();
 
 	protected abstract ConnectionPoolDataSource getConnectionPoolDataSource();
-
-	/**
-	 * if {@link #getConnectionPoolDataSource()} returns null, this must return non-null
-	 * @return
-	 */
-	protected abstract DataSource getDataSource();
 
 	/**
 	 * get the database to connect to
@@ -490,60 +418,25 @@ public abstract class PersistImpl<T> extends SQL<T> {
 
 	Pool pool;
 
-	private Connection theConnection;
-
 	/**
 	 * @param ds - JDBC poolable data source
 	 * @param max_connections - how many connections to keep in the pool
 	 * @param timeout - time in seconds when to idle out connections
 	 */
-	protected void setupConnectionPool(ConnectionPoolDataSource ds, int max_connections, int timeout, DataSource dataSource)throws PersistenceException{
-		if(ds==null && dataSource==null){
-			throw new IllegalStateException("Must have either ConnectionPoolDataSource or normal DataSource!");
+	protected void setupConnectionPool(ConnectionPoolDataSource ds, int max_connections, int timeout)throws PersistenceException{
+		if(ds==null){
+			throw new IllegalStateException("Must ConnectionPoolDataSource");
 		}
-		if(ds!=null){
-			pool=new Pool(ds,max_connections,timeout);
-			logger.info("Connection pooling enabled, maxConnections="+max_connections+" timeout="+timeout);
-		}
-		else{
-			try{
-				theConnection=dataSource.getConnection();
-			}catch(SQLException e){
-				throw new PersistenceException(e);
-			}
-		}
+		pool=new Pool(ds,max_connections,timeout);
+		logger.info("Connection pooling enabled, maxConnections="+max_connections+" timeout="+timeout);
 	}
 
-	protected synchronized Connection getConnection()throws PersistenceException{
-		if(theConnection!=null)return theConnection;
-
-		try{
-			return pool.getConnection();
-		}catch(SQLException se){
-			throw new PersistenceException(se);
-		}
+	protected synchronized Connection getConnection()throws SQLException {
+		return pool.getConnection();
 	}
 
-	protected void disposeConnection(Connection conn) {
-		if(theConnection!=null)return;
-
-		try{
-			if(conn!=null && !conn.isClosed()){
-				conn.close();
-			}
-		}catch(SQLException se){
-			logger.error("Error closing connection.",se);
-		}
-	}
-
-	protected void shutdownPool()throws PersistenceException{
-		if(theConnection!=null)return;
-
-		try{
-			pool.dispose();
-		}catch(SQLException se){
-			throw new PersistenceException(se);
-		}
+	protected void shutdownPool()throws SQLException{
+		pool.dispose();
 	}
 	
 	public int getActiveConnections() {
@@ -552,35 +445,25 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	
 	@Override
 	public String getStatusMessage(){
-		return createConnString()+" <"+getActiveConnections()+"> connections.";
+		return connectionURL+" <"+getActiveConnections()+"> connections.";
 	}
 	
 	protected boolean tableExists() throws PersistenceException, SQLException {
-		String tb = pd.getTableName();
-		Connection conn=getConnection();
-		synchronized(conn){
-			try{
+		try(Connection conn = getConnection()){
+			synchronized(conn){
 				DatabaseMetaData md = conn.getMetaData();
-				ResultSet rs = md.getTables(null, null, tb.toUpperCase(), null);
+				ResultSet rs = md.getTables(null, null,  pd.getTableName().toUpperCase(), null);
 				return rs.next();
-			}
-			finally{
-				disposeConnection(conn);
 			}
 		}
 	}
 	
 	protected boolean columnExists(String column) throws PersistenceException, SQLException {
-		String tb = pd.getTableName();
-		Connection conn=getConnection();
-		synchronized(conn){
-			try{
+		try(Connection conn = getConnection()){
+			synchronized(conn){
 				DatabaseMetaData md = conn.getMetaData();
-				ResultSet rs = md.getColumns(null, null, tb.toUpperCase(), column.toUpperCase());
+				ResultSet rs = md.getColumns(null, null, pd.getTableName().toUpperCase(), column.toUpperCase());
 				return rs.next();
-			}
-			finally{
-				disposeConnection(conn);
 			}
 		}
 	}

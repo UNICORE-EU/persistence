@@ -3,25 +3,24 @@
   <groupId>de.fzj.unicore</groupId>
   <artifactId>persistence</artifactId>
   <name>Lightweight Object Persistence Layer</name>
-  <version>0.302</version>
+  <version>0.400</version>
 
   <parent>
     <groupId>eu.unicore</groupId>
     <artifactId>unicore-parent</artifactId>
-    <version>2.1</version>
+    <version>2.2</version>
   </parent>
-        
+
   <properties>
     <mysql.version>8.0.30</mysql.version>
-    <pgsql.version>42.4.1</pgsql.version>
+    <pgsql.version>42.5.0</pgsql.version>
     <h2.version>2.1.214</h2.version>
     <gson.version>2.9.1</gson.version>
     <guava.version>31.1-jre</guava.version>
     <commons-codec.version>1.15</commons-codec.version>
     <jproperties.version>1.1.1</jproperties.version>
     <log4j.version>2.18.0</log4j.version>
-	  
-    <!--seclib.version>5.4.1</seclib.version-->
+
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -33,7 +32,7 @@
       <organizationUrl>https://www.fz-juelich.de/jsc</organizationUrl>
     </developer>
   </developers>
-  
+
   <scm>
     <connection>scm:git:git://github.com/UNICORE-EU/persistence.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/UNICORE-EU/persistence.git</developerConnection>
@@ -41,20 +40,6 @@
     <tag>HEAD</tag>
   </scm>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-           <systemPropertyVariables>
-             <jna.nosys>true</jna.nosys>
-           </systemPropertyVariables>
-	   <forkCount>1</forkCount>
-	   <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
   <repositories>
     <repository>
       <id>unicore.eu</id>
@@ -62,6 +47,7 @@
       <url>https://unicore-dev.zam.kfa-juelich.de/maven</url>
     </repository>
   </repositories>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -100,11 +86,6 @@
       <artifactId>h2</artifactId>
       <version>${h2.version}</version>
     </dependency>
-    <!--dependency>
-      <groupId>eu.unicore.security</groupId>
-      <artifactId>securityLibrary</artifactId>
-      <version>${seclib.version}</version>
-    </dependency-->
     <dependency>
       <groupId>eu.unicore</groupId>
       <artifactId>jproperties-conf</artifactId>

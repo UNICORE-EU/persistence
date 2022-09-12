@@ -32,6 +32,7 @@
 
 package de.fzj.unicore.persist.impl;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,9 +53,9 @@ public class InMemory<T> extends Base<T>{
 	
 	public InMemory(){}
 	
-	public void init() throws PersistenceException {
+	public void init() throws PersistenceException, SQLException {
 		super.init();
-		map = new ConcurrentHashMap<String, T>();
+		map = new ConcurrentHashMap<>();
 	}
 	public String getDriverName() {
 		return ConcurrentHashMap.class.getName();
@@ -63,13 +64,13 @@ public class InMemory<T> extends Base<T>{
 	public void shutdown() {}
 
 	public List<String> getIDs() throws PersistenceException {
-		List<String> res=new ArrayList<String>();
+		List<String> res = new ArrayList<>();
 		for(String s: map.keySet())res.add(s);
 		return res;
 	}
 
 	public List<String> getIDs(String column, Object value) throws PersistenceException {
-		List<String> res=new ArrayList<String>();
+		List<String> res = new ArrayList<>();
 		for(String s: map.keySet()){
 			T val=map.get(s);
 			String cmp=pd.getColumnValue(column, val);
@@ -79,7 +80,7 @@ public class InMemory<T> extends Base<T>{
 	}
 	
 	public List<String> findIDs(boolean orMode, String column, String... values) throws PersistenceException {
-		List<String> res=new ArrayList<String>();
+		List<String> res=new ArrayList<>();
 		for(String s: map.keySet()){
 			T val=map.get(s);
 			String cmp=pd.getColumnValue(column, val);
@@ -93,7 +94,7 @@ public class InMemory<T> extends Base<T>{
 	}
 	
 	public Map<String,String> getColumnValues(String column) throws PersistenceException {
-		Map<String,String> res=new HashMap<String,String>();
+		Map<String,String> res = new HashMap<>();
 		for(String id: map.keySet()){
 			T val=map.get(id);
 			String value=pd.getColumnValue(column, val);

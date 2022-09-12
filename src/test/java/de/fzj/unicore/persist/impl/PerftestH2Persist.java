@@ -12,7 +12,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
-import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.PersistenceProperties;
 
 
@@ -51,11 +50,11 @@ public class PerftestH2Persist {
 	public Boolean cache;
 	
 	@Test
-	public void perfTestJSONvsBinary()throws PersistenceException{
+	public void perfTestJSONvsBinary()throws Exception{
 		doTest(numberOfInstances, size, cache);
 	}
 	
-	private void doTest(int numberOfInstances, int size, Boolean cache)throws PersistenceException{
+	private void doTest(int numberOfInstances, int size, Boolean cache)throws Exception{
 		System.out.println("\n\n**** Running test with numInstances="+numberOfInstances
 				+" data_size="+size
 				+" cache="+cache);
@@ -96,7 +95,7 @@ public class PerftestH2Persist {
 		p.shutdown();
 	}
 
-	protected void readSomeRandomEntries(int numberOfInstances)throws PersistenceException{
+	protected void readSomeRandomEntries(int numberOfInstances)throws Exception{
 		for(int i=0;i<50;i++){
 			Dao1 e=p.read(String.valueOf(rand.nextInt(numberOfInstances)));
 			assert e!=null;

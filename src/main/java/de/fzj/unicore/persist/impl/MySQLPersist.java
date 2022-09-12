@@ -59,13 +59,11 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 
 	private static final Logger logger = LogManager.getLogger("unicore.persistence.MySQLPersist");
 
-	private String sqlHost, sqlUser, sqlPass, sqlType;
-
 	@Override
 	public List<String> getSQLCreateTable() throws PersistenceException, SQLException {
 		List<String> cmds = new ArrayList<>();
 		String tb=pd.getTableName();
-		if(sqlType==null)sqlType = config.getSubkeyValue(PersistenceProperties.MYSQL_TABLETYPE, tb);
+		String sqlType = config.getSubkeyValue(PersistenceProperties.MYSQL_TABLETYPE, tb);
 		String type=getSQLStringType();
 		cmds.add("CREATE TABLE IF NOT EXISTS "+tb+" (id VARCHAR(255) PRIMARY KEY, data "
 				+type+") ENGINE="+sqlType);
@@ -88,60 +86,21 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 		return "LONGTEXT";
 	}
 
-	private String connectionURL;
-	
 	@Override
-	protected synchronized String createConnString(){
-		if(connectionURL!=null){
-			return connectionURL;
-		}
-		String tb=pd.getTableName();
-		if(sqlHost==null)sqlHost = config.getSubkeyValue(PersistenceProperties.DB_HOST, tb);
-		connectionURL = "jdbc:mysql://"+sqlHost+":"+getDatabaseServerPort()+"/"+getDatabaseName()+"?autoReconnect=true";
-		logger.info("Connecting to: "+connectionURL);
-		return connectionURL;
+	protected int getDefaultPort() {
+		return 3306;
 	}
 
 	@Override
-	protected int getDatabaseServerPort() {
-		String tb = pd.getTableName();
-		Integer port = config.getSubkeyIntValue(PersistenceProperties.DB_PORT, tb);
-		if(port==null) {
-			port = 3306;
-		}
-		return port;
-	}
-
-	@Override
-	protected String getDriverName(){
-		String driver=config!=null?config.getSubkeyValue(PersistenceProperties.DB_DRIVER, pd.getTableName()):"com.mysql.cj.jdbc.Driver";
-		if(driver==null){
-			driver = "com.mysql.cj.jdbc.Driver";
-		}
-		return driver;
-	}
-
-	@Override
-	protected String getUserName(){
-		if(sqlUser==null){
-			sqlUser = config.getSubkeyValue(PersistenceProperties.DB_USER, pd.getTableName());
-		}
-		return sqlUser;
-	}
-
-	@Override
-	protected String getPassword(){
-		if(sqlPass==null){
-			sqlPass = config.getSubkeyValue(PersistenceProperties.DB_PASSWORD, pd.getTableName());
-		}
-		return sqlPass;
+	protected String getDefaultDriverName(){
+		return "com.mysql.cj.jdbc.Driver";
 	}
 
 	@Override
 	protected ConnectionPoolDataSource getConnectionPoolDataSource(){
 		MysqlConnectionPoolDataSource ds=new MysqlConnectionPoolDataSource();
 		ds.setDatabaseName(getDatabaseName());
-		sqlHost=config==null?"localhost":config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
+		String sqlHost=config==null?"localhost":config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
 		ds.setPort(getDatabaseServerPort());
 		ds.setServerName(sqlHost);
 		ds.setUser(getUserName());
@@ -159,8 +118,8 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 			logger.warn("Error configuring MySQL driver auto-reconnect", se);
 		}
 		//for info purposes, create and log the connection string
-		String conn = "jdbc:mysql://"+sqlHost+":"+getDatabaseServerPort()+"/"+getDatabaseName()+"?ssl="+sslMode+"&serverTimezone="+tz;
-		logger.info("Connecting to: {}", conn);
+		connectionURL = "jdbc:mysql://"+sqlHost+":"+getDatabaseServerPort()+"/"+getDatabaseName()+"?ssl="+sslMode+"&serverTimezone="+tz;
+		logger.info("Connecting to: {}", connectionURL);
 		return ds;
 	}
 	
@@ -169,7 +128,7 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 	}
 	
 	@Override
-	protected Connection getConnection()throws PersistenceException{
+	protected Connection getConnection() throws SQLException {
 		Connection c=null;
 		try{
 			c=super.getConnection();	
@@ -181,7 +140,6 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 			}catch(Exception ex){/*ignored*/}
 			c=super.getConnection();
 		}
-		
 		return c;
 	}
 
@@ -202,13 +160,12 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 		return runCheck(sql);
 	}
 	
-	private boolean runCheck(String sql) throws SQLException, PersistenceException {
-		Connection conn=getConnection();
-		synchronized(conn){
-			try(Statement s=conn.createStatement()){
-				return s.executeQuery(sql).next();
-			}finally{
-				disposeConnection(conn);
+	private boolean runCheck(String sql) throws SQLException{
+		try(Connection conn = getConnection()){
+			synchronized(conn){
+				try(Statement s=conn.createStatement()){
+					return s.executeQuery(sql).next();
+				}
 			}
 		}
 	}

@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.sql.SQLException;
 import java.util.Properties;
 
 import com.google.gson.Gson;
@@ -83,7 +84,7 @@ public class Import {
 		System.out.println("Done, imported "+count+" elements, "+errors+" errors occured.");
 	}
 
-    public void shutdown() throws PersistenceException {
+    public void shutdown() throws PersistenceException, SQLException {
     	output.shutdown();
     }
     

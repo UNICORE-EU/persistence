@@ -1,31 +1,20 @@
 package de.fzj.unicore.persist.impl;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import de.fzj.unicore.persist.ObjectMarshaller;
-import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.util.GSONUtil;
 
 public class JSONMarshaller<T> implements ObjectMarshaller<T> {
 
-	private static final Logger logger = LogManager.getLogger("unicore.persistence.JSONMarshaller");
-
 	private final Gson gson;
+
 	private final Class<T>classOfT;
-	
-	public JSONMarshaller(Gson gson, Class<T>classOfT){
-		this.gson = gson;
-		this.classOfT = classOfT;
-	}
 
 	public JSONMarshaller(Class<T>classOfT){
 		this.classOfT = classOfT;
@@ -38,38 +27,27 @@ public class JSONMarshaller<T> implements ObjectMarshaller<T> {
 		return builder.create();
 	}
 	@Override
-	public T deserialize(InputStream is) throws IOException,
-			PersistenceException {
+	public T deserialize(InputStream is) {
 		return gson.fromJson(new InputStreamReader(is), classOfT);
 	}
 
 	@Override
-	public T deserialize(byte[] data) throws IOException, PersistenceException {
-		if(logger.isTraceEnabled()){
-			logger.trace("De-serializing to "+classOfT.getName()+":\n"+new String(data));
-		}
+	public T deserialize(byte[] data) {
 		return deserialize(new ByteArrayInputStream(data));
 	}
 
 	@Override
-	public byte[] serialize(T object) throws IOException, PersistenceException {
+	public byte[] serialize(T object) {
 		return encode(object).getBytes();
 	}
 
 	@Override
-	public String encode(T input) throws IOException, PersistenceException {
-		String json=gson.toJson(input);
-		if(logger.isTraceEnabled()){
-			logger.trace("Serialized form of "+input+"\n"+json);
-		}
-		return json;
+	public String encode(T input) {
+		return gson.toJson(input);
 	}
 
 	@Override
-	public T decode(String input) throws IOException, PersistenceException {
-		if(logger.isTraceEnabled()){
-			logger.trace("De-serializing to "+classOfT.getName()+":\n"+input);
-		}
+	public T decode(String input) {
 		return gson.fromJson(input, classOfT);
 	}
 

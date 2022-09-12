@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.sql.ConnectionPoolDataSource;
-import javax.sql.DataSource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -57,9 +56,6 @@ import de.fzj.unicore.persist.PersistenceProperties;
 public class PGSQLPersist<T> extends PersistImpl<T>{
 
 	private static final Logger logger = LogManager.getLogger("unicore.persistence.PGSQLPersist");
-
-	private String sqlHost, sqlUser, sqlPass;
-	private int sqlPort;
 
 	@Override
 	public List<String> getSQLCreateTable() throws PersistenceException, SQLException {
@@ -87,60 +83,21 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 		return "TEXT";
 	}
 
-	private String connectionURL;
-	
 	@Override
-	protected synchronized String createConnString(){
-		if(connectionURL!=null){
-			return connectionURL;
-		}
-		String tb=pd.getTableName();
-		if(sqlHost==null)sqlHost = config.getSubkeyValue(PersistenceProperties.DB_HOST, tb);
-		connectionURL = "jdbc:postgresql://"+sqlHost+":"+getDatabaseServerPort()+"/"+getDatabaseName();
-		logger.info("Connecting to: "+connectionURL);
-		return connectionURL;
+	protected String getDefaultDriverName(){
+		return "org.postgresql.Driver";
 	}
 
 	@Override
-	protected String getDriverName(){
-		String driver=config!=null?config.getSubkeyValue(PersistenceProperties.DB_DRIVER, pd.getTableName()):"org.postgresql.Driver";
-		if(driver==null){
-			driver = "org.postgresql.Driver";
-		}
-		return driver;
-	}
-
-	@Override
-	protected int getDatabaseServerPort() {
-		String tb = pd.getTableName();
-		Integer port = config.getSubkeyIntValue(PersistenceProperties.DB_PORT, tb);
-		if(port==null) {
-			port = 5432;
-		}
-		return port;
-	}
-
-	@Override
-	protected String getUserName(){
-		if(sqlUser==null){
-			sqlUser = config.getSubkeyValue(PersistenceProperties.DB_USER, pd.getTableName());
-		}
-		return sqlUser;
-	}
-
-	@Override
-	protected String getPassword(){
-		if(sqlPass==null){
-			sqlPass = config.getSubkeyValue(PersistenceProperties.DB_PASSWORD, pd.getTableName());
-		}
-		return sqlPass;
+	protected int getDefaultPort() {
+		return  5432;
 	}
 
 	@Override
 	protected ConnectionPoolDataSource getConnectionPoolDataSource(){
 		PGConnectionPoolDataSource ds = new PGConnectionPoolDataSource();
 		ds.setDatabaseName(getDatabaseName());
-		sqlHost=config==null?"localhost":config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
+		String sqlHost=config==null?"localhost":config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
 		int port = getDatabaseServerPort();
 		ds.setPortNumbers(new int[] { port });
 		ds.setServerNames(new String[] { sqlHost });
@@ -156,16 +113,13 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 		}catch(Exception ex) {
 			throw new RuntimeException(ex);
 		}
-		logger.info("Connecting to: jdbc:postgresql://{}:{}/{}?ssl={}", sqlHost, sqlPort, getDatabaseName(),sslMode);
+		connectionURL = String.format("jdbc:postgresql://%s:%d/%s?ssl=%s", sqlHost, port, getDatabaseName(),sslMode);
+		logger.info("Connecting to: {}", connectionURL);
 		return ds;
 	}
-	
-	protected DataSource getDataSource(){
-		return null;
-	}
-	
+
 	@Override
-	protected Connection getConnection()throws PersistenceException{
+	protected Connection getConnection() throws SQLException{
 		Connection c=null;
 		try{
 			c=super.getConnection();
@@ -176,7 +130,6 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 			}catch(Exception ex){/*ignored*/}
 			c=super.getConnection();
 		}
-		
 		return c;
 	}
 
@@ -196,12 +149,11 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 	}
 
 	private boolean runCheck(String sql) throws SQLException, PersistenceException {
-		Connection conn=getConnection();
-		synchronized(conn){
-			try(Statement s=conn.createStatement()){
-				return s.executeQuery(sql).next();
-			}finally{
-				disposeConnection(conn);
+		try(Connection conn=getConnection()){
+			synchronized(conn){
+				try(Statement s=conn.createStatement()){
+					return s.executeQuery(sql).next();
+				}
 			}
 		}
 	}
