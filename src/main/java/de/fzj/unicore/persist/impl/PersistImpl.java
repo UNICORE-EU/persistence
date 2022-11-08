@@ -108,11 +108,15 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	}
 
 	public List<String> getIDs()throws PersistenceException, SQLException {
+		return getIDs(false);
+	}
+	
+	public List<String> getIDs(boolean oldestFirst)throws PersistenceException, SQLException {
 		List<String>result=new ArrayList<>();
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
 				try (Statement s = conn.createStatement()){
-					ResultSet rs = s.executeQuery(getSQLSelectAllKeys());
+					ResultSet rs = s.executeQuery(getSQLSelectAllKeys(oldestFirst));
 					while(rs.next()){
 						result.add(rs.getString(1));
 					}

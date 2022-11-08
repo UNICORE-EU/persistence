@@ -186,10 +186,19 @@ public interface Persist<T> {
 	 */
 	public void removeAll()throws PersistenceException, SQLException;
 	
+	
 	/**
-	 * get all IDs
+	 * get all IDs in (descending) order of creation time (ie., latest first)
 	 */
 	public List<String> getIDs()throws PersistenceException, SQLException;
+	
+	/**
+	 * get all IDs with the specified ordering
+	 * @param oldestFirst - if true, the entries will be ordered by ascending creation time
+	 */
+	public default List<String> getIDs(boolean oldestFirst)throws PersistenceException, SQLException{
+		return getIDs();
+	}
 	
 	/**
 	 * get a list of dao IDs where a column has a certain value

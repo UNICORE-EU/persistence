@@ -70,8 +70,9 @@ public abstract class SQL<T> extends Base<T>{
 		return "DELETE FROM "+pd.getTableName()+";";
 	}
 
-	protected String getSQLSelectAllKeys(){
-		return "SELECT ID, CREATED FROM "+pd.getTableName()+" ORDER BY CREATED;";
+	protected String getSQLSelectAllKeys(boolean oldestFirst){
+		return "SELECT ID, CREATED FROM "+pd.getTableName()+" ORDER BY CREATED"
+				+(oldestFirst? "" : " DESC")+";";
 	}
 
 	protected String getSQLSelectKeys(String column, Object value){
