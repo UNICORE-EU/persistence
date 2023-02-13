@@ -3,7 +3,7 @@
   <groupId>de.fzj.unicore</groupId>
   <artifactId>persistence</artifactId>
   <name>Lightweight Object Persistence Layer</name>
-  <version>0.402</version>
+  <version>0.403</version>
 
   <parent>
     <groupId>eu.unicore</groupId>
@@ -12,14 +12,14 @@
   </parent>
 
   <properties>
-    <mysql.version>8.0.31</mysql.version>
-    <pgsql.version>42.5.0</pgsql.version>
+    <mysql.version>8.0.32</mysql.version>
+    <pgsql.version>42.5.3</pgsql.version>
     <h2.version>2.1.214</h2.version>
-    <gson.version>2.9.1</gson.version>
+    <gson.version>2.10.1</gson.version>
     <guava.version>31.1-jre</guava.version>
     <commons-codec.version>1.15</commons-codec.version>
-    <jproperties.version>1.1.1</jproperties.version>
-    <log4j.version>2.18.0</log4j.version>
+    <jproperties.version>1.1.2</jproperties.version>
+    <log4j.version>2.19.0</log4j.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
