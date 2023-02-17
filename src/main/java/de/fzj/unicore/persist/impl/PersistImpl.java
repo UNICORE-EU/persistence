@@ -242,21 +242,20 @@ public abstract class PersistImpl<T> extends SQL<T> {
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
 				try(Statement s=conn.createStatement()){
-					PreparedStatement ps = null;
 					String exists=getSQLExists(id);
 					if(s.executeQuery(exists).next()){
 						//update
-						ps=conn.prepareStatement(getSQLUpdate());
-						parametrizePSUpdate(ps,id, dao);
-						ps.executeUpdate();
-						ps.clearParameters();
+						try(PreparedStatement ps=conn.prepareStatement(getSQLUpdate())){
+							parametrizePSUpdate(ps,id, dao);
+							ps.executeUpdate();
+						}
 					}
 					else{
 						//insert
-						ps=conn.prepareStatement(getSQLInsert());
-						parametrizePSInsert(ps, id, dao);
-						ps.executeUpdate();
-						ps.clearParameters();
+						try(PreparedStatement ps=conn.prepareStatement(getSQLInsert())){
+							parametrizePSInsert(ps, id, dao);
+							ps.executeUpdate();
+						}
 					}
 				}
 			}
