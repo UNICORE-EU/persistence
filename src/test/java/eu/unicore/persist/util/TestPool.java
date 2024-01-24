@@ -22,8 +22,6 @@ import javax.sql.ConnectionPoolDataSource;
 
 import org.junit.Test;
 
-import eu.unicore.persist.util.Pool;
-
 public class TestPool {
 
 	private static final int maxConnections = 8; // number of connections

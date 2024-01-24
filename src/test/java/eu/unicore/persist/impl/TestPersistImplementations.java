@@ -10,9 +10,6 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import eu.unicore.persist.PersistenceProperties;
-import eu.unicore.persist.impl.H2Persist;
-import eu.unicore.persist.impl.InMemory;
-import eu.unicore.persist.impl.PersistImpl;
 
 
 /**

@@ -3,9 +3,6 @@ package eu.unicore.persist.impl;
 import org.junit.Test;
 
 import eu.unicore.persist.PersistenceProperties;
-import eu.unicore.persist.impl.MySQLPersist;
-import eu.unicore.persist.impl.PGSQLPersist;
-import eu.unicore.persist.impl.PersistenceDescriptor;
 
 public class TestDBImpls {
 

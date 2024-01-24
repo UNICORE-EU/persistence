@@ -5,7 +5,6 @@ import org.junit.Test;
 
 import eu.unicore.persist.Persist;
 import eu.unicore.persist.PersistenceProperties;
-import eu.unicore.persist.impl.H2Persist;
 
 
 public class TestDataIntegrity {

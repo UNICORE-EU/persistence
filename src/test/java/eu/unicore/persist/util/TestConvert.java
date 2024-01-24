@@ -10,7 +10,6 @@ import eu.unicore.persist.PersistenceFactory;
 import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.persist.impl.Dao1;
 import eu.unicore.persist.impl.H2Persist;
-import eu.unicore.persist.util.Convert;
 
 public class TestConvert {
 

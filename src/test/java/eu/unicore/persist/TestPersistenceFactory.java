@@ -5,9 +5,6 @@ import java.io.File;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import eu.unicore.persist.Persist;
-import eu.unicore.persist.PersistenceFactory;
-import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.persist.impl.Dao1;
 import eu.unicore.persist.impl.H2Persist;
 import eu.unicore.persist.impl.InMemory;

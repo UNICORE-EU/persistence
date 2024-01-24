@@ -8,8 +8,6 @@ import eu.unicore.persist.Persist;
 import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.persist.impl.Dao1;
 import eu.unicore.persist.impl.H2Persist;
-import eu.unicore.persist.util.Export;
-import eu.unicore.persist.util.Import;
 
 public class TestExportImport {
 

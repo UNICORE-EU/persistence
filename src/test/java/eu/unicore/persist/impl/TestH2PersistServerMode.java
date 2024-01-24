@@ -9,8 +9,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import eu.unicore.persist.PersistenceProperties;
-import eu.unicore.persist.impl.H2Persist;
-import eu.unicore.persist.impl.PersistenceDescriptor;
 
 
 /**

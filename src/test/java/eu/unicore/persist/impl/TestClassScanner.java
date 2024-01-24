@@ -5,9 +5,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import eu.unicore.persist.impl.ClassScanner;
-import eu.unicore.persist.impl.ColumnDescriptor;
-
 
 public class TestClassScanner {
 
