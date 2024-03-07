@@ -3,7 +3,7 @@
   <groupId>eu.unicore</groupId>
   <artifactId>persistence</artifactId>
   <name>Lightweight Object Persistence Layer</name>
-  <version>0.603</version>
+  <version>0.604</version>
 
   <parent>
     <groupId>eu.unicore</groupId>
