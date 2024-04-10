@@ -14,7 +14,7 @@ public class TestMySQL {
 		PersistenceProperties cf = new PersistenceProperties();
 		cf.setProperty(PersistenceProperties.DB_DATABASE, "test");
 		cf.setProperty(PersistenceProperties.DB_USER, "root");
-		cf.setProperty(PersistenceProperties.DB_PASSWORD, "test123");
+		cf.setProperty(PersistenceProperties.DB_PASSWORD, "root");
 		cf.setProperty(PersistenceProperties.MYSQL_SSL, "true");
 		new Tester(MySQLPersist.class, cf).run();
 	}
