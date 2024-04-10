@@ -1,35 +1,3 @@
-/*********************************************************************************
- * Copyright (c) 2008 Forschungszentrum Juelich GmbH 
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * (1) Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the disclaimer at the end. Redistributions in
- * binary form must reproduce the above copyright notice, this list of
- * conditions and the following disclaimer in the documentation and/or other
- * materials provided with the distribution.
- * 
- * (2) Neither the name of Forschungszentrum Juelich GmbH nor the names of its 
- * contributors may be used to endorse or promote products derived from this 
- * software without specific prior written permission.
- * 
- * DISCLAIMER
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *********************************************************************************/
-
 package eu.unicore.persist.impl;
 
 import java.sql.Connection;
@@ -51,8 +19,8 @@ import eu.unicore.persist.PersistenceProperties;
 
 
 /**
- * MySQL based persistence
- * 
+ * MySQL implementation
+ *
  * @author schuller
  */
 public class MySQLPersist<T> extends PersistImpl<T>{
@@ -60,23 +28,26 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 	private static final Logger logger = LogManager.getLogger("unicore.persistence.MySQLPersist");
 
 	@Override
-	public List<String> getSQLCreateTable() throws PersistenceException, SQLException {
+	protected List<String> getSQLCreateTable() throws PersistenceException, SQLException {
 		List<String> cmds = new ArrayList<>();
-		String tb=pd.getTableName();
-		String sqlType = config.getSubkeyValue(PersistenceProperties.MYSQL_TABLETYPE, tb);
-		String type=getSQLStringType();
-		cmds.add("CREATE TABLE IF NOT EXISTS "+tb+" (id VARCHAR(255) PRIMARY KEY, data "
-				+type+") ENGINE="+sqlType);
+		String tb = pd.getTableName();
+		String engineType = config.getSubkeyValue(PersistenceProperties.MYSQL_TABLETYPE, tb);
+		String stringType = getSQLStringType();
+		cmds.add(String.format("CREATE TABLE IF NOT EXISTS %s (id VARCHAR(240) PRIMARY KEY, data %s) ENGINE=%s",
+				tb, stringType, engineType)
+		);
 		boolean haveTable = tableExists();
 		if(pd.getColumns().size()>0){
 			for(ColumnDescriptor c: pd.getColumns()){
 				if(!haveTable || !columnExists(c.getColumn())){
-					cmds.add("ALTER TABLE "+pd.getTableName()+" ADD COLUMN "+c.getColumn()+" "+type);
+					cmds.add(String.format("ALTER TABLE %s ADD COLUMN %s %s",
+							tb, c.getColumn(), stringType));
 				}
 			}
 		}
 		if(!haveTable || !columnExists("CREATED")){
-			cmds.add("ALTER TABLE "+pd.getTableName()+" ADD COLUMN created CHAR(32) NOT NULL DEFAULT '"+getTimeStamp()+"'");
+			cmds.add(String.format("ALTER TABLE %s ADD COLUMN created CHAR(32) NOT NULL DEFAULT '%s'",
+					tb, getTimeStamp()));
 		}
 		return cmds;
 	}
@@ -118,7 +89,8 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 			logger.warn("Error configuring MySQL driver auto-reconnect", se);
 		}
 		//for info purposes, create and log the connection string
-		connectionURL = "jdbc:mysql://"+sqlHost+":"+getDatabaseServerPort()+"/"+getDatabaseName()+"?ssl="+sslMode+"&serverTimezone="+tz;
+		connectionURL = String.format("jdbc:mysql://%s:%s/%s?ssl=%s&serverTimezone=%s",
+				sqlHost, getDatabaseServerPort(), getDatabaseName(), sslMode, tz);
 		logger.info("Connecting to: {}", connectionURL);
 		return ds;
 	}
@@ -134,7 +106,7 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 			c=super.getConnection();	
 			((com.mysql.cj.jdbc.JdbcConnection)c).ping();
 		}catch(Exception se){
-			logger.warn("Error when getting a MySQL connection: "+se.getMessage()+", trying to reconnect.");
+			logger.warn("Error when getting a MySQL connection: {}, trying to reconnect.", se.getMessage());
 			try{
 				pool.cleanupPooledConnections();
 			}catch(Exception ex){/*ignored*/}

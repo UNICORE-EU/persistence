@@ -1,16 +1,3 @@
-//Copyright 2007-2009 Christian d'Heureuse, Inventec Informatik AG, Zurich, Switzerland
-//www.source-code.biz, www.inventec.ch/chdh
-//
-//This module is multi-licensed and may be used under the terms
-//of any of the following licenses:
-//
-//EPL, Eclipse Public License, http://www.eclipse.org/legal
-//LGPL, GNU Lesser General Public License, http://www.gnu.org/licenses/lgpl.html
-//MPL, Mozilla Public License 1.1, http://www.mozilla.org/MPL
-//
-//Please contact the author if you need another license.
-//This module is provided "as is", without warranties of any kind.
-
 package eu.unicore.persist.util;
 
 import java.sql.Connection;

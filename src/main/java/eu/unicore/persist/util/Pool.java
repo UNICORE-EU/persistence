@@ -1,16 +1,3 @@
-//Copyright 2007-2009 Christian d'Heureuse, Inventec Informatik AG, Zurich, Switzerland
-//www.source-code.biz, www.inventec.ch/chdh
-//
-//This module is multi-licensed and may be used under the terms
-//of any of the following licenses:
-//
-//EPL, Eclipse Public License, http://www.eclipse.org/legal
-//LGPL, GNU Lesser General Public License, http://www.gnu.org/licenses/lgpl.html
-//MPL, Mozilla Public License 1.1, http://www.mozilla.org/MPL
-//
-//Please contact the author if you need another license.
-//This module is provided "as is", without warranties of any kind.
-
 package eu.unicore.persist.util;
 
 import java.sql.Connection;
@@ -36,15 +23,6 @@ import org.apache.logging.log4j.Logger;
  * Home page: <a href="http://www.source-code.biz">www.source-code.biz</a><br>
  * Author: Christian d'Heureuse, Inventec Informatik AG, Zurich, Switzerland<br>
  * Multi-licensed: EPL/LGPL/MPL.
- * <p>
- * 2007-06-21: Constructor with a timeout parameter added.<br>
- * 2008-05-03: Additional licenses added (EPL/MPL).<br>
- * 2009-06-26: Variable recycledConnections changed from Stack to Queue, so that
- * the unused connections are reused in a circular manner. Thanks to Daniel
- * Jurado for the tip.<br>
- * 2009-08-21: ArrayDeque (which was introduced with change 2009-06-26) replaced
- * by LinkedList, because ArrayDeque is only available since Java 1.6 and we
- * want to keep MiniConnectionPoolManager compatible with Java 1.5.<br>
  */
 public class Pool {
 
