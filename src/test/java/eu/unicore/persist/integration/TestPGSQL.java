@@ -15,7 +15,6 @@ public class TestPGSQL {
 		cf.setProperty(PersistenceProperties.DB_DATABASE, "postgres");
 		cf.setProperty(PersistenceProperties.DB_USER, "postgres");
 		cf.setProperty(PersistenceProperties.DB_PASSWORD, "root");
-		//cf.setProperty(PersistenceProperties.MYSQL_SSL, "true");
 		new Tester(PGSQLPersist.class, cf).run();
 	}
 
