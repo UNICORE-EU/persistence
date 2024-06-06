@@ -198,7 +198,7 @@ public interface Persist<T> {
 	 * get a map containing the values of one particular column
 	 * 
 	 * @param column - the column name
-	 * @return a Map<String,String> of column values keyed with the ID
+	 * @return a Map of column values keyed with the ID
 	 */
 	public Map<String,String> getColumnValues(String column)throws PersistenceException, SQLException;
 	
