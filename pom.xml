@@ -10,6 +10,7 @@
     <artifactId>unicore-parent</artifactId>
     <version>3.0.1</version>
   </parent>
+
   <properties>
     <mysql.version>8.4.0</mysql.version>
     <pgsql.version>42.7.3</pgsql.version>
@@ -22,6 +23,7 @@
     <log4j.version>2.20.0</log4j.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
   <developers>
     <developer>
       <name>Bernd Schuller</name>
@@ -30,11 +32,13 @@
       <organizationUrl>https://www.fz-juelich.de/jsc</organizationUrl>
     </developer>
   </developers>
+
   <scm>
     <connection>scm:git:git://github.com/UNICORE-EU/persistence.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/UNICORE-EU/persistence.git</developerConnection>
     <url>https://github.com/UNICORE-EU/persistence</url>
   </scm>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -94,6 +98,7 @@
       <version>${gson.version}</version>
     </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>
@@ -104,19 +109,6 @@
           </excludes>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.2.0</version>
-        <configuration>
-          <additionalJOption>-Xdoclint:none</additionalJOption>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-  		<artifactId>maven-site-plugin</artifactId>
-	    <version>3.7.1</version>
-	  </plugin>
     </plugins>
   </build>
 
@@ -127,14 +119,14 @@
         <plugins>
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                  <excludes>
-                    <exclude>none</exclude>
-                  </excludes>
-                  <includes>
-                    <include>**/integration/*</include>
-                  </includes>
-                </configuration>
+            <configuration>
+              <excludes>
+                <exclude>none</exclude>
+              </excludes>
+              <includes>
+                <include>**/integration/*</include>
+              </includes>
+            </configuration>
           </plugin>
         </plugins>
       </build>
