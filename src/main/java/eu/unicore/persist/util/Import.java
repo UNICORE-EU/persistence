@@ -16,7 +16,6 @@ import eu.unicore.persist.Persist;
 import eu.unicore.persist.PersistenceException;
 import eu.unicore.persist.PersistenceFactory;
 import eu.unicore.persist.PersistenceProperties;
-import eu.unicore.persist.impl.PersistenceDescriptor;
 
 /**
  * Exports a database to JSON<br/>
@@ -34,7 +33,6 @@ public class Import {
 	private Class daoClass;
 	private Persist output;
 
-
 	public Import(File inFile, Properties outputConfig)throws Exception{
 		setup(outputConfig);
 		input=new InputStreamReader(new FileInputStream(inFile));
@@ -44,22 +42,17 @@ public class Import {
 		setup(outputConfig);
 		input=new StringReader(json);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void setup(Properties outputConfig)throws Exception{
-		daoClass=Class.forName((String)outputConfig.remove("class"));
-		Class inPersistImpl=Class.forName(outputConfig.getProperty("persistence.class"));
-		String inTableName=(String)outputConfig.remove("tableName");
-		PersistenceDescriptor pdIn=PersistenceDescriptor.get(daoClass);
-		if(inTableName!=null){
-			pdIn.setTableName(inTableName);
-		}
-		output=PersistenceFactory.get(new PersistenceProperties(outputConfig)).configurePersist(daoClass, inPersistImpl, pdIn);
+		daoClass = Class.forName((String)outputConfig.remove("class"));
+		Class inPersistImpl = Class.forName(outputConfig.getProperty("persistence.class"));
+		output=PersistenceFactory.get(new PersistenceProperties(outputConfig)).configurePersist(daoClass, inPersistImpl);
 		GsonBuilder builder = new GsonBuilder();
 		GSONUtil.registerTypeConverters(daoClass, builder);
 		gson=builder.create();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public void doImport()throws Exception{
 		int errors=0;
@@ -87,7 +80,7 @@ public class Import {
     public void shutdown() throws PersistenceException, SQLException {
     	output.shutdown();
     }
-    
+
 	public Persist<?> getOutput() {
 		return output;
 	}
@@ -109,5 +102,4 @@ public class Import {
 		importer.doImport();
 		importer.shutdown();
 	}
-
 }

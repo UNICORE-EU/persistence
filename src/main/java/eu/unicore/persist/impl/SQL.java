@@ -14,6 +14,10 @@ import eu.unicore.persist.PersistenceException;
  */
 public abstract class SQL<T> extends Base<T>{
 
+	public SQL(Class<T> daoClass) {
+		super(daoClass);
+	}
+
 	protected abstract List<String> getSQLCreateTable() throws PersistenceException, SQLException;
 	
 	protected String getSQLStringType(){

@@ -38,17 +38,6 @@ public class Pool {
 	private boolean isDisposed;
 
 	/**
-	 * Thrown in {@link #getConnection()} when no free connection becomes
-	 * available within <code>timeout</code> seconds.
-	 */
-	public static class TimeoutException extends RuntimeException {
-		private static final long serialVersionUID = 1;
-		public TimeoutException() {
-			super("Timeout while waiting for a free database connection.");
-		}
-	}
-
-	/**
 	 * Constructs a MiniConnectionPoolManager object with a timeout of 60
 	 * seconds.
 	 * 
@@ -134,9 +123,6 @@ public class Pool {
 	 * it must close it in order to return it to the pool.
 	 * 
 	 * @return a new Connection object.
-	 * @throws TimeoutException
-	 *             when no connection becomes available within
-	 *             <code>timeout</code> seconds.
 	 */
 	public Connection getConnection() throws SQLException {
 		// This routine is unsynchronized, because semaphore.tryAcquire() may
@@ -148,9 +134,9 @@ public class Pool {
 		}
 		try {
 			if (!semaphore.tryAcquire(timeout, TimeUnit.SECONDS))
-				throw new TimeoutException();
+				throw new SQLException("Timeout while waiting for a free database connection.");
 		} catch (InterruptedException e) {
-			throw new RuntimeException(
+			throw new SQLException(
 					"Interrupted while waiting for a database connection.", e);
 		}
 		boolean ok = false;

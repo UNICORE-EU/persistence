@@ -16,7 +16,7 @@ public class Dao1 implements Serializable{
 	private String other="";
 	
 	@ID
-	private String id;
+	private String id = "the id";
 
 	public String getData() {
 		return data;

@@ -1,52 +1,52 @@
 package eu.unicore.persist.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class TestClassScanner {
 
 	@Test
-	public void testGetIDByMethodAnnotation(){
+	public void testGetIDByMethodAnnotation() throws Exception {
 		Method m=ClassScanner.getGetIdMethod(Dao1.class);
-		assert(m.getName().equals("getId"));
-		try{
-			Object res=m.invoke(new Dao1(), (Object[])null);
-			assert(res.toString().equals("the id"));
-		}catch(Exception e){}
+		assertEquals("getId", m.getName());
+		Object res=m.invoke(new Dao1(), (Object[])null);
+		assertEquals("the id", res.toString());
 	}
-	
+
 	@Test
-	public void testGetIDByFieldAnnotation(){
+	public void testGetIDByFieldAnnotation() throws Exception {
 		Method m=ClassScanner.getGetIdMethod(Dao2.class);
-		assert(m.getName().equals("getId"));
-		try{
-			Object res=m.invoke(new Dao2(), (Object[])null);
-			assert(res.toString().equals("the id"));
-		}catch(Exception e){}
+		assertEquals("getId", m.getName());
+		Object res = m.invoke(new Dao2(), (Object[])null);
+		assertEquals("the id", res.toString());
 	}
-	
+
 	@Test
-	public void testColumnFieldAnnotation(){
+	public void testColumnFieldAnnotation() throws Exception {
 		List<ColumnDescriptor>list=ClassScanner.getColumns(Dao2.class);
-		assert list.size()==1;
+		assertEquals(1, list.size());
 		ColumnDescriptor cd=list.get(0);
-		assert cd.getColumn().equalsIgnoreCase("foo");
+		assertEquals("foo", cd.getColumn());
 	}
-	
-	
-	@Test(expected = IllegalArgumentException.class)
+
+	@Test
 	public void testFaultyDAO1(){
-		ClassScanner.getGetIdMethod(FaultyDao1.class);
+		assertThrows(IllegalArgumentException.class,()->{
+			ClassScanner.getGetIdMethod(FaultyDao1.class);
+		});
 	}
-	
-	@Test(expected = IllegalArgumentException.class)
+
+	@Test
 	public void testFaultyDAO2(){
-		ClassScanner.getGetIdMethod(FaultyDao2.class);
+		assertThrows(IllegalArgumentException.class,()->{
+			ClassScanner.getGetIdMethod(FaultyDao2.class);
+		});
 	}
-	
-	
-	
+
 }

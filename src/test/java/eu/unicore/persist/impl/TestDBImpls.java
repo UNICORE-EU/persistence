@@ -1,6 +1,9 @@
 package eu.unicore.persist.impl;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.persist.PersistenceProperties;
 
@@ -10,39 +13,35 @@ public class TestDBImpls {
 	public void testMySQL() throws Exception {
 		System.out.println(" ** MYSQL");
 		PersistenceProperties cf=new PersistenceProperties();
-		MySQLPersist<Dao1> p = new MySQLPersist<>() {
+		MySQLPersist<Dao1> p = new MySQLPersist<>(Dao1.class) {
 			protected boolean runCheck(String sql) {
 				return true;
 			}
 		};
-		p.setPersistenceDescriptor(PersistenceDescriptor.get(Dao1.class));
 		p.setConfigSource(cf);
-		p.setDaoClass(Dao1.class);
 		System.out.println(p.getSQLCreateTable());
-		assert "LONGTEXT".equals(p.getSQLStringType());
+		assertEquals("LONGTEXT", p.getSQLStringType());
 		System.out.println(p.getSQLDelete("1234"));
-		assert 3306==p.getDefaultPort();
+		assertEquals(3306, p.getDefaultPort());
 		Class.forName(p.getDefaultDriverName());
-		assert p.getConnectionPoolDataSource()!=null;
+		assertNotNull(p.getConnectionPoolDataSource());
 	}
 	
 	@Test
 	public void testPGSQL() throws Exception {
 		System.out.println(" ** PGSQL");
 		PersistenceProperties cf=new PersistenceProperties();
-		PGSQLPersist<Dao1> p = new PGSQLPersist<>() {
+		PGSQLPersist<Dao1> p = new PGSQLPersist<>(Dao1.class) {
 			protected boolean runCheck(String sql) {
 				return true;
 			}
 		};
-		p.setPersistenceDescriptor(PersistenceDescriptor.get(Dao1.class));
 		p.setConfigSource(cf);
-		p.setDaoClass(Dao1.class);
 		System.out.println(p.getSQLCreateTable());
-		assert "TEXT".equals(p.getSQLStringType());
+		assertEquals("TEXT", p.getSQLStringType());
 		System.out.println(p.getSQLDelete("1234"));
-		assert 5432==p.getDefaultPort();
+		assertEquals(5432, p.getDefaultPort());
 		Class.forName(p.getDefaultDriverName());
-		assert p.getConnectionPoolDataSource()!=null;
+		assertNotNull(p.getConnectionPoolDataSource());
 	}
 }

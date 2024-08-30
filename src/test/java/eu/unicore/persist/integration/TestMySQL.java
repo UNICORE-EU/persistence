@@ -1,6 +1,6 @@
 package eu.unicore.persist.integration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.persist.impl.MySQLPersist;

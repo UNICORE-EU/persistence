@@ -16,7 +16,6 @@ import eu.unicore.persist.PersistenceException;
 import eu.unicore.persist.PersistenceFactory;
 import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.persist.impl.PersistImpl;
-import eu.unicore.persist.impl.PersistenceDescriptor;
 
 /**
  * Exports a database to JSON<br/>
@@ -33,33 +32,28 @@ public class Export {
 	private Gson gson;
 	private Writer output;
 	Class daoClass;
-	
+
 	public Export(PersistImpl<?> input)throws Exception{
 		this.input = input;
 		daoClass=input.getDaoClass();
 		completeSetup();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Export(Properties inputConfig)throws Exception{
-		daoClass=Class.forName((String)inputConfig.remove("class"));
-		Class inPersistImpl=Class.forName(inputConfig.getProperty("persistence.class"));
-		String inTableName=(String)inputConfig.remove("tableName");
-		PersistenceDescriptor pdIn=PersistenceDescriptor.get(daoClass);
-		if(inTableName!=null){
-			pdIn.setTableName(inTableName);
-		}
-		input=PersistenceFactory.get(new PersistenceProperties(inputConfig)).configurePersist(daoClass, inPersistImpl, pdIn);
+		daoClass = Class.forName((String)inputConfig.remove("class"));
+		Class inPersistImpl = Class.forName(inputConfig.getProperty("persistence.class"));
+		input = PersistenceFactory.get(new PersistenceProperties(inputConfig)).configurePersist(daoClass, inPersistImpl);
 		completeSetup();
 	}
-	
+
 	private void completeSetup(){
 		GsonBuilder builder = new GsonBuilder();
 		GSONUtil.registerTypeConverters(daoClass, builder);
 		gson = builder.create();
 		output=new OutputStreamWriter(System.out);
 	}
-	
+
     @SuppressWarnings("unchecked")
 	public void doExport()throws Exception{
     	JsonWriter writer = new JsonWriter(output);
@@ -87,7 +81,7 @@ public class Export {
     public void shutdown() throws PersistenceException, SQLException {
     	input.shutdown();
     }
-    
+
 	public Persist<?> getInput() {
 		return input;
 	}
@@ -109,5 +103,5 @@ public class Export {
 		export.doExport();
 		export.shutdown();
 	}
-	
+
 }

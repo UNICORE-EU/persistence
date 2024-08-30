@@ -58,7 +58,9 @@ public class H2Persist<T> extends PersistImpl<T>{
 		cleanupThread.start();
 	}
 	
-	public H2Persist(){}
+	public H2Persist(Class<T> daoClass) {
+		super(daoClass);
+	}
 
 	@Override
 	public void init()throws PersistenceException, SQLException {

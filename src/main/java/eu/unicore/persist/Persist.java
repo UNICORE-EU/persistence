@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import eu.unicore.persist.impl.LockSupport;
-import eu.unicore.persist.impl.PersistenceDescriptor;
 
 /**
  * Client interface to the persistence layer<br/>
@@ -223,16 +222,7 @@ public interface Persist<T> {
 	
 	//lifecycle methods
 
-	public void setDaoClass(Class<?>daoClass);
-	
 	public void setConfigSource(PersistenceProperties configSource);
-	
-
-	/**
-	 * allows to explicitly set the {@link PersistenceDescriptor}. If not set, it will be
-	 * created lazily by evaluating annotations on the persisted class
-	 */
-	public void setPersistenceDescriptor(PersistenceDescriptor pd);
 
 	public LockSupport getLockSupport();
 

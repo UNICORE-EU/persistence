@@ -7,7 +7,7 @@ import java.util.Random;
 
 import javax.sql.ConnectionPoolDataSource;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestPool {
 
@@ -137,14 +137,9 @@ public class TestPool {
 	}
 
 	private static void initDb() throws SQLException {
-		Connection conn = null;
-		try {
-			conn = poolMgr.getConnection();
+		try (Connection conn = poolMgr.getConnection()){
 			System.out.println("initDb connected");
 			initDb2(conn);
-		} finally {
-			if (conn != null)
-				conn.close();
 		}
 		System.out.println("initDb done");
 	}
@@ -165,19 +160,13 @@ public class TestPool {
 	private static void execSqlNoErr(Connection conn, String sql) {
 		try {
 			execSql(conn, sql);
-		} catch (SQLException e) {
-		}
+		} catch (SQLException e) {}
 	}
 
 	private static void execSql(Connection conn, String sql)
 			throws SQLException {
-		Statement st = null;
-		try {
-			st = conn.createStatement();
+		try(Statement st = conn.createStatement()){
 			st.executeUpdate(sql);
-		} finally {
-			if (st != null)
-				st.close();
 		}
 	}
 

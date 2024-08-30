@@ -28,9 +28,9 @@ public abstract class Base<T> implements Persist<T>{
 
 	private static final Logger logger = LogManager.getLogger("unicore.persistence.Base");
 
-	protected Class<T>daoClass;
+	protected final Class<T>daoClass;
 
-	protected PersistenceDescriptor pd;
+	protected final PersistenceDescriptor pd;
 
 	protected PersistenceProperties config;
 
@@ -44,7 +44,9 @@ public abstract class Base<T> implements Persist<T>{
 
 	protected ObjectMarshaller<T> marshaller;
 
-	public Base(){
+	public Base(Class<T>daoClass){
+		this.daoClass = daoClass;
+		this.pd = PersistenceDescriptor.get(daoClass);
 	}
 
 	@Override
@@ -53,14 +55,8 @@ public abstract class Base<T> implements Persist<T>{
 	}
 
 	@Override
-	public void setPersistenceDescriptor(PersistenceDescriptor pd){
-		this.pd=pd;
-	}
-
-	@Override
 	public void init()throws PersistenceException, SQLException {
-		if(pd==null)pd=PersistenceDescriptor.get(daoClass);
-		String table=pd.getTableName();
+		String table = pd.getTableName();
 		try {
 			// check that we can load the driver class
 			Class.forName(getDriverName());
@@ -280,12 +276,6 @@ public abstract class Base<T> implements Persist<T>{
 	}
 
 	protected abstract void _removeAll() throws PersistenceException, SQLException;
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public void setDaoClass(Class<?>daoClass){
-		this.daoClass=(Class<T>)daoClass;
-	}
 
 	public Class<T> getDaoClass(){
 		return daoClass;

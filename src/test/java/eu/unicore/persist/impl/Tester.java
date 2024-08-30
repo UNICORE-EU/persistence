@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 
 import eu.unicore.persist.Persist;
 import eu.unicore.persist.PersistenceProperties;
@@ -17,7 +17,7 @@ import eu.unicore.persist.PersistenceProperties;
  * 
  * @author schuller
  */
-@Ignore
+@Disabled
 public class Tester {
 
 	@SuppressWarnings("rawtypes")
@@ -45,8 +45,8 @@ public class Tester {
 	
 	@SuppressWarnings("unchecked")
 	private void testBasicCRUD(boolean cache)throws Exception {
-		Persist<Dao1>p=(Persist<Dao1>)persistClass.getConstructor().newInstance();
-		p.setDaoClass(Dao1.class);
+		Persist<Dao1>p = (Persist<Dao1>)persistClass.getConstructor(Class.class).
+			newInstance(Dao1.class);
 		p.setCaching(cache);
 		if(properties!=null)p.setConfigSource(properties);
 		p.init();
@@ -101,8 +101,9 @@ public class Tester {
 	@SuppressWarnings("unchecked")
 	private void testAdditionalColumns(Boolean cache)throws Exception{
 		System.out.println("Testing "+persistClass.getName());
-		Persist<Dao2>p=(Persist<Dao2>)persistClass.getConstructor().newInstance();
-		p.setDaoClass(Dao2.class);
+		Persist<Dao2>p = (Persist<Dao2>)persistClass.getConstructor(Class.class).
+				newInstance(Dao2.class);
+		
 		p.setCaching(cache);
 		if(properties!=null)p.setConfigSource(properties);
 		p.init();
@@ -140,8 +141,8 @@ public class Tester {
 
 	@SuppressWarnings("unchecked")
 	private void testFindIDs(Boolean cache)throws Exception{
-		Persist<Dao2>p=(Persist<Dao2>)persistClass.getConstructor().newInstance();
-		p.setDaoClass(Dao2.class);
+		Persist<Dao2>p = (Persist<Dao2>)persistClass.getConstructor(Class.class).
+				newInstance(Dao2.class);
 		p.setCaching(cache);
 		if(properties!=null)p.setConfigSource(properties);
 		p.init();
@@ -175,8 +176,9 @@ public class Tester {
 	
 	@SuppressWarnings("unchecked")
 	private void testLocking() throws Exception {
-		final Persist<Dao1>p=(Persist<Dao1>)persistClass.getConstructor().newInstance();
-		p.setDaoClass(Dao1.class);
+		final Persist<Dao1>p = (Persist<Dao1>)persistClass.getConstructor(Class.class).
+				newInstance(Dao1.class);
+		
 		if(properties!=null)p.setConfigSource(properties);
 		p.init();
 		p.removeAll();
@@ -218,8 +220,8 @@ public class Tester {
 	
 	@SuppressWarnings("unchecked")
 	private void testManualLocking() throws Exception {
-		final Persist<Dao1>p=(Persist<Dao1>)persistClass.getConstructor().newInstance();
-		p.setDaoClass(Dao1.class);
+		final Persist<Dao1>p = (Persist<Dao1>)persistClass.getConstructor(Class.class).
+				newInstance(Dao1.class);
 		if(properties!=null)p.setConfigSource(properties);
 		p.init();
 		p.removeAll();

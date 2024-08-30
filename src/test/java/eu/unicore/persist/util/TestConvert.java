@@ -1,9 +1,12 @@
 package eu.unicore.persist.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.FileInputStream;
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.persist.Persist;
 import eu.unicore.persist.PersistenceFactory;
@@ -27,7 +30,7 @@ public class TestConvert {
 		out.setProperty("persistence."+PersistenceProperties.DB_DIRECTORY, "./target/testdata2");
 		
 		Convert conv=new Convert(in,out);
-		assert conv!=null;
+		assertNotNull(conv);
 		
 		Dao1 x=new Dao1();
 		x.setId("1");
@@ -40,13 +43,11 @@ public class TestConvert {
 		Persist<Dao1>outDB=(Persist<Dao1>)conv.getOutput();
 		
 		Dao1 y=(Dao1)outDB.read("1");
-		
-		assert y!=null;
-		assert "test".equals(y.getData());
-		
+		assertNotNull(y);
+		assertEquals("test", y.getData());
 		conv.shutDown();
 	}
-	
+
 	@Test
 	public void testMain() throws Exception{
 		String inProps="src/test/resources/convert1.properties";
@@ -61,7 +62,7 @@ public class TestConvert {
 		out.setProperty("persistence.class", H2Persist.class.getName());
 		
 		Convert conv=new Convert(in,out);
-		assert conv!=null;
+		assertNotNull(conv);
 		
 		Dao1 x=new Dao1();
 		x.setId("1");
@@ -76,7 +77,7 @@ public class TestConvert {
 		
 		Persist<Dao1>outDB=PersistenceFactory.get(new PersistenceProperties(out)).getPersist(Dao1.class);
 		Dao1 d=outDB.read("1");
-		assert(d!=null);
-		assert("test".equals(d.getData()));
+		assertNotNull(d);
+		assertEquals("test", d.getData());
 	}
 }

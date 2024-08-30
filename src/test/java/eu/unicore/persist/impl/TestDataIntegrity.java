@@ -1,27 +1,29 @@
 package eu.unicore.persist.impl;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.persist.Persist;
 import eu.unicore.persist.PersistenceProperties;
 
 
 public class TestDataIntegrity {
-	
+
 	Persist<Dao3>p;
 	long total;
-	
+
 	String[] ids={"1","2","3"};
-	
-	@Before
+
+	@BeforeEach
 	public void init()throws Exception{
 		total=0;
-		p=new H2Persist<Dao3>();
+		p=new H2Persist<Dao3>(Dao3.class);
 		PersistenceProperties props = new PersistenceProperties();
 		props.setDatabaseDirectory("target/test_data");
 		p.setConfigSource(props);
-		p.setDaoClass(Dao3.class);
 		p.setCaching(true);
 		p.init();
 		for(String id: ids){
@@ -31,7 +33,7 @@ public class TestDataIntegrity {
 			p.write(test);
 		}
 	}
-	
+
 	@Test
 	public void testIsolation1()throws Exception{
 		Dao3 orig=null;
@@ -43,15 +45,14 @@ public class TestDataIntegrity {
 			
 			//check that we get a new copy, i.e. the original value of the data field
 			test=p.read(id);
-			assert(test.getData().intValue()==0);
+			assertEquals(0, test.getData().intValue());
 			p.write(orig);
 			//check that a read now returns the new value
 			test=p.read(id);
-			assert(test.getData().intValue()==1);
-			
+			assertEquals(1, test.getData().intValue());
 		}	
 	}
-	
+
 	@Test
 	public void testIsolation2()throws Exception{
 		Dao3 orig=null;
@@ -65,8 +66,8 @@ public class TestDataIntegrity {
 
 			//check that a read still returns the old value
 			test=p.read(id);
-			assert(test!=null);
-			assert(test.getData().intValue()==0);
+			assertNotNull(test);
+			assertEquals(0, test.getData().intValue());
 		}	
 	}
 	

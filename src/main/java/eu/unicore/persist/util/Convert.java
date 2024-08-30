@@ -7,7 +7,6 @@ import java.util.Properties;
 import eu.unicore.persist.Persist;
 import eu.unicore.persist.PersistenceFactory;
 import eu.unicore.persist.PersistenceProperties;
-import eu.unicore.persist.impl.PersistenceDescriptor;
 
 /**
  * converts a database
@@ -23,25 +22,14 @@ public class Convert {
 	
 	@SuppressWarnings("unchecked")
 	public Convert(Properties inputConfig, Properties outputConfig)throws Exception{
-		Class inClass=Class.forName((String)inputConfig.remove("class"));
-		Class inPersistImpl=Class.forName(inputConfig.getProperty("persistence.class"));
-		String inTableName=(String)inputConfig.remove("tableName");
-		PersistenceDescriptor pdIn=PersistenceDescriptor.get(inClass);
-		if(inTableName!=null){
-			pdIn.setTableName(inTableName);
-		}
-		input=PersistenceFactory.get(new PersistenceProperties(inputConfig)).configurePersist(inClass, inPersistImpl, pdIn);
-		
-		Class outClass=Class.forName((String)outputConfig.remove("class"));
-		Class outPersistImpl=Class.forName(outputConfig.getProperty("persistence.class"));
-		String outTableName=(String)outputConfig.remove("tableName");
-		PersistenceDescriptor pdOut=PersistenceDescriptor.get(outClass);
-		if(outTableName!=null){
-			pdOut.setTableName(outTableName);
-		}
-		output=PersistenceFactory.get(new PersistenceProperties(outputConfig)).configurePersist(outClass,outPersistImpl,pdOut);
+		Class inClass = Class.forName((String)inputConfig.remove("class"));
+		Class inPersistImpl = Class.forName(inputConfig.getProperty("persistence.class"));
+		input = PersistenceFactory.get(new PersistenceProperties(inputConfig)).configurePersist(inClass, inPersistImpl);
+		Class outClass = Class.forName((String)outputConfig.remove("class"));
+		Class outPersistImpl = Class.forName(outputConfig.getProperty("persistence.class"));
+		output = PersistenceFactory.get(new PersistenceProperties(outputConfig)).configurePersist(outClass,outPersistImpl);
 	}
-	
+
     @SuppressWarnings("unchecked")
 	public void convert()throws Exception{
 		int errors=0;

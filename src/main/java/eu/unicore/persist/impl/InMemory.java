@@ -19,7 +19,9 @@ public class InMemory<T> extends Base<T>{
 
 	protected Map<String,T>map;
 	
-	public InMemory(){}
+	public InMemory(Class<T>daoClass){
+		super(daoClass);
+	}
 	
 	@Override
 	public void init() throws PersistenceException, SQLException {

@@ -34,11 +34,11 @@ public abstract class PersistImpl<T> extends SQL<T> {
 
 	protected String databaseName=null;
 
-	// only for logging purposes
+	// for logging purposes
 	protected String connectionURL = "";
 
-	public PersistImpl(){
-		super();
+	public PersistImpl(Class<T> daoClass) {
+		super(daoClass);
 	}
 
 	@Override
@@ -347,7 +347,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 
 	protected abstract String getDefaultDriverName();
 
-	protected abstract ConnectionPoolDataSource getConnectionPoolDataSource();
+	protected abstract ConnectionPoolDataSource getConnectionPoolDataSource() throws SQLException;
 
 	/**
 	 * get the database to connect to

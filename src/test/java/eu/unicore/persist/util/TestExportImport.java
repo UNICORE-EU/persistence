@@ -1,8 +1,10 @@
 package eu.unicore.persist.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.persist.Persist;
 import eu.unicore.persist.PersistenceProperties;
@@ -20,7 +22,7 @@ public class TestExportImport {
 		in.setProperty("persistence.class", H2Persist.class.getName());
 		in.setProperty("persistence."+PersistenceProperties.DB_DIRECTORY, "target/testdata");
 		Export export=new Export(in);
-		assert export!=null;
+		assertNotNull(export);
 		
 		Dao1 x=new Dao1();
 		x.setId("1");
@@ -48,13 +50,13 @@ public class TestExportImport {
 		  "{\"data\":\"another test\",\"other\":\"foo\",\"id\":\"2\"}\n]";
 		System.out.println("Reading from "+json);
 		Import importer=new Import(json,out);
-		assert importer!=null;
+		assertNotNull(importer);
 		importer.doImport();
 		
 		Persist<Dao1>inDB=(Persist<Dao1>)importer.getOutput();
 		Dao1 x = inDB.read("1");
-		assert x!=null;
+		assertNotNull(x);
 		Dao1 x2 = inDB.read("2");
-		assert x2!=null;
+		assertNotNull(x2);
 	}
 }

@@ -27,6 +27,10 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 
 	private static final Logger logger = LogManager.getLogger("unicore.persistence.MySQLPersist");
 
+	public MySQLPersist(Class<T> daoClass) {
+		super(daoClass);
+	}
+
 	@Override
 	protected List<String> getSQLCreateTable() throws PersistenceException, SQLException {
 		List<String> cmds = new ArrayList<>();
@@ -68,7 +72,7 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 	}
 
 	@Override
-	protected ConnectionPoolDataSource getConnectionPoolDataSource(){
+	protected ConnectionPoolDataSource getConnectionPoolDataSource() throws SQLException {
 		MysqlConnectionPoolDataSource ds=new MysqlConnectionPoolDataSource();
 		ds.setDatabaseName(getDatabaseName());
 		String sqlHost=config==null?"localhost":config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
@@ -79,15 +83,11 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 		String tz = config==null?"UTC":config.getSubkeyValue(PersistenceProperties.MYSQL_TIMEZONE, pd.getTableName());
 		String sslModeS = config==null?"false":config.getSubkeyValue(PersistenceProperties.MYSQL_SSL, pd.getTableName());
 		boolean sslMode = Boolean.parseBoolean(sslModeS);
-		try{
-			ds.setVerifyServerCertificate(false);
-			ds.setUseSSL(sslMode);
-			ds.setAutoReconnect(true);
-			ds.setAutoReconnectForPools(true);
-			ds.setServerTimezone(tz);
-		}catch(SQLException se){
-			logger.warn("Error configuring MySQL driver auto-reconnect", se);
-		}
+		ds.setVerifyServerCertificate(false);
+		ds.setUseSSL(sslMode);
+		ds.setAutoReconnect(true);
+		ds.setAutoReconnectForPools(true);
+		ds.setServerTimezone(tz);
 		//for info purposes, create and log the connection string
 		connectionURL = String.format("jdbc:mysql://%s:%s/%s?ssl=%s&serverTimezone=%s",
 				sqlHost, getDatabaseServerPort(), getDatabaseName(), sslMode, tz);

@@ -1,13 +1,10 @@
 package eu.unicore.persist.impl;
 
-import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.unicore.persist.PersistenceProperties;
 
@@ -18,22 +15,11 @@ import eu.unicore.persist.PersistenceProperties;
  * 
  * @author schuller
  */
-@RunWith(Parameterized.class)
 public class TestPersistImplementations {
 
-	@Parameters
-	public static Iterable<? extends Object> implementations(){
-		return Arrays.asList(
-				H2Persist.class,
-				InMemory.class
-		);
-	}	
-
-	@Parameter
-	public Class<? extends PersistImpl<?>> persistClass;
-	
-	@Test
-	public void testBasic() throws Exception {
+	@ParameterizedTest
+	@ValueSource(classes = {H2Persist.class, InMemory.class})
+	public void testBasic(Class<?>persistClass) throws Exception {
 		PersistenceProperties cf=new PersistenceProperties();
 		cf.setDatabaseDirectory("./target/test_data");
 		new Tester(persistClass, cf).run();
@@ -42,11 +28,10 @@ public class TestPersistImplementations {
 	@Test
 	public void testSerializableWrapper()throws Exception, 
 	InstantiationException, IllegalAccessException, TimeoutException, InterruptedException{
-		H2Persist<Dao5>p=new H2Persist<Dao5>();
+		H2Persist<Dao5>p = new H2Persist<>(Dao5.class);
 		PersistenceProperties config=new PersistenceProperties();
 		config.setDatabaseDirectory("target/test_data");
 		p.setConfigSource(config);
-		p.setDaoClass(Dao5.class);
 		p.setCaching(false);
 		p.init();
 		p.removeAll();

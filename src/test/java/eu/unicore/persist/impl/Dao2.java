@@ -10,8 +10,7 @@ public class Dao2 implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	@ID
-	private String id;
+	private String id = "the id";
 	
 	@Column(name="foo")
 	private String field="some-content";
@@ -34,6 +33,7 @@ public class Dao2 implements Serializable {
 		this.field = extra;
 	}
 
+	@ID
 	public String getId() {
 		return id;
 	}

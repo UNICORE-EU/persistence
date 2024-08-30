@@ -25,6 +25,10 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 
 	private static final Logger logger = LogManager.getLogger("unicore.persistence.PGSQLPersist");
 
+	public PGSQLPersist(Class<T> daoClass) {
+		super(daoClass);
+	}
+
 	@Override
 	protected List<String> getSQLCreateTable() throws PersistenceException, SQLException {
 		List<String> cmds = new ArrayList<>();
@@ -74,13 +78,9 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 		ds.setPassword(getPassword());
 		String sslModeS = config==null?"true":config.getSubkeyValue(PersistenceProperties.PGSQL_SSL, pd.getTableName());
 		boolean sslMode = Boolean.parseBoolean(sslModeS);
-		try{
-			ds.setSsl(sslMode);
-			if(sslMode) {
-				ds.setSslmode("allow");
-			}
-		}catch(Exception ex) {
-			throw new RuntimeException(ex);
+		ds.setSsl(sslMode);
+		if(sslMode) {
+			ds.setSslmode("allow");
 		}
 		connectionURL = String.format("jdbc:postgresql://%s:%d/%s?ssl=%s", sqlHost, port, getDatabaseName(), sslMode);
 		logger.info("Connecting to: {}", connectionURL);

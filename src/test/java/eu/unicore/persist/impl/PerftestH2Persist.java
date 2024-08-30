@@ -7,11 +7,9 @@ import java.util.Collection;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import eu.unicore.persist.PersistenceProperties;
 
@@ -19,48 +17,38 @@ import eu.unicore.persist.PersistenceProperties;
 /**
  * runs a set of tests with different data sizes and instance numbers
  */
-@RunWith(Parameterized.class)
 public class PerftestH2Persist {
 
 	private static PersistImpl<Dao1>p;
 
 	private Random rand=new Random();
 
-	@Parameters
-	public static Collection<Object[]>getDataForJSONTest(){
+	public static Collection<Object[]>getData(){
 		return Arrays.asList(new Object[][]{
 				// numberOfInstances, size, cache
 				{10000,5000,Boolean.FALSE},
 				{10000,5000,Boolean.FALSE}
 		});
 	}
-	
+
 	protected void createPersist() throws SQLException {
 		FileUtils.deleteQuietly(new File("target/test_data"));
-		p=new H2Persist<Dao1>();
+		p = new H2Persist<>(Dao1.class);
 		PersistenceProperties props = new PersistenceProperties();
 		props.setDatabaseDirectory("target/test_data");
 		p.setConfigSource(props);
 	}
-	
-	@Parameter
-	public int numberOfInstances; 
-	@Parameter(1)
-	public int size;
-	@Parameter(2)
-	public Boolean cache;
-	
-	@Test
-	public void perfTestJSONvsBinary()throws Exception{
-		doTest(numberOfInstances, size, cache);
-	}
-	
-	private void doTest(int numberOfInstances, int size, Boolean cache)throws Exception{
+
+	@ParameterizedTest
+	@MethodSource("getData")
+	public void perfTestJSONvsBinary(ArgumentsAccessor args)throws Exception{
+		int numberOfInstances = args.getInteger(0);
+		int size = args.getInteger(1);
+		Boolean cache = args.getBoolean(2);
 		System.out.println("\n\n**** Running test with numInstances="+numberOfInstances
 				+" data_size="+size
 				+" cache="+cache);
 		createPersist();
-		p.setDaoClass(Dao1.class);
 		p.setCaching(cache);
 		long start=System.currentTimeMillis();
 		p.init();
@@ -84,12 +72,11 @@ public class PerftestH2Persist {
 			p.write(d);
 		}
 		System.out.println("Time for writing: "+(System.currentTimeMillis()-start));
-		
 		System.out.println("Entries in DB:    "+p.getIDs().size());
 		start=System.currentTimeMillis();
 		readSomeRandomEntries(numberOfInstances);
 		System.out.println("Time for reading 50 random entries: "+(System.currentTimeMillis()-start));
-		//select subset woth other="true"
+		//select subset with other="true"
 		start=System.currentTimeMillis();
 		Collection<String> ids=p.getIDs("other", Boolean.TRUE);
 		assert ids!=null;
@@ -105,6 +92,4 @@ public class PerftestH2Persist {
 			assert e!=null;
 		}
 	}
-
-
 }
