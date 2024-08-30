@@ -24,10 +24,14 @@ public class Convert {
 	public Convert(Properties inputConfig, Properties outputConfig)throws Exception{
 		Class inClass = Class.forName((String)inputConfig.remove("class"));
 		Class inPersistImpl = Class.forName(inputConfig.getProperty("persistence.class"));
-		input = PersistenceFactory.get(new PersistenceProperties(inputConfig)).configurePersist(inClass, inPersistImpl);
+		String inTableName=(String)inputConfig.remove("tableName");
+		input = PersistenceFactory.get(new PersistenceProperties(inputConfig)).
+				configurePersist(inClass, inPersistImpl, inTableName);
 		Class outClass = Class.forName((String)outputConfig.remove("class"));
 		Class outPersistImpl = Class.forName(outputConfig.getProperty("persistence.class"));
-		output = PersistenceFactory.get(new PersistenceProperties(outputConfig)).configurePersist(outClass,outPersistImpl);
+		String outTableName=(String)outputConfig.remove("tableName");
+		output = PersistenceFactory.get(new PersistenceProperties(outputConfig)).
+				configurePersist(outClass,outPersistImpl, outTableName);
 	}
 
     @SuppressWarnings("unchecked")
@@ -47,9 +51,7 @@ public class Convert {
 				errors++;
 			}
 		}
-		
 		System.out.println("Done, "+errors+" errors occured.");
-
 	}
 	
 	public void shutDown()throws Exception{

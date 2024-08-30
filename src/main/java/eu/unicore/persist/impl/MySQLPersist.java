@@ -27,8 +27,8 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 
 	private static final Logger logger = LogManager.getLogger("unicore.persistence.MySQLPersist");
 
-	public MySQLPersist(Class<T> daoClass) {
-		super(daoClass);
+	public MySQLPersist(Class<T> daoClass, String tableName) {
+		super(daoClass, tableName);
 	}
 
 	@Override

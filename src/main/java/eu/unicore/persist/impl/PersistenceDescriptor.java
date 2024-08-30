@@ -16,16 +16,14 @@ import eu.unicore.persist.PersistenceException;
  */
 public class PersistenceDescriptor {
 
-	public PersistenceDescriptor(){}
-	
 	private String tableName;
-	
+
 	private Method getIdMethod;
-	
+
 	private List<ColumnDescriptor>columns;
-	
+
 	private Map<String,ColumnDescriptor>columnMap;
-	
+
 	public static PersistenceDescriptor get(Class<?>daoClass){
 		PersistenceDescriptor pd=new PersistenceDescriptor();
 		pd.setTableName(ClassScanner.getTableName(daoClass));

@@ -25,8 +25,8 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 
 	private static final Logger logger = LogManager.getLogger("unicore.persistence.PGSQLPersist");
 
-	public PGSQLPersist(Class<T> daoClass) {
-		super(daoClass);
+	public PGSQLPersist(Class<T> daoClass, String tableName) {
+		super(daoClass, tableName);
 	}
 
 	@Override

@@ -33,7 +33,7 @@ public class TestPersistenceFactory {
 		p.setProperty(PersistenceProperties.DB_IMPL+".Dao1", H2Persist.class.getName());
 		Class<?>clazz = PersistenceFactory.get(p).getPersistClass(Dao1.class);
 		assert clazz.isAssignableFrom(H2Persist.class);
-		Persist<Dao1> persist=PersistenceFactory.get(p).getPersist(Dao1.class);
+		Persist<Dao1> persist=PersistenceFactory.get(p).getPersist(Dao1.class, null);
 		persist.shutdown();
 		assert tmp.listFiles().length>0;
 		FileUtils.deleteQuietly(tmp);

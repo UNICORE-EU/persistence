@@ -68,14 +68,14 @@ public class TestConvert {
 		x.setId("1");
 		x.setData("test");
 		
-		Persist<Dao1>inDB=PersistenceFactory.get(new PersistenceProperties(in)).getPersist(Dao1.class);
+		Persist<Dao1>inDB=PersistenceFactory.get(new PersistenceProperties(in)).getPersist(Dao1.class, null);
 		inDB.write(x);
 		
 		
 		String[]args={inProps,outProps};
 		Convert.main(args);
 		
-		Persist<Dao1>outDB=PersistenceFactory.get(new PersistenceProperties(out)).getPersist(Dao1.class);
+		Persist<Dao1>outDB=PersistenceFactory.get(new PersistenceProperties(out)).getPersist(Dao1.class, null);
 		Dao1 d=outDB.read("1");
 		assertNotNull(d);
 		assertEquals("test", d.getData());

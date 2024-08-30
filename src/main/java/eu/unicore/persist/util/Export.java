@@ -43,7 +43,8 @@ public class Export {
 	public Export(Properties inputConfig)throws Exception{
 		daoClass = Class.forName((String)inputConfig.remove("class"));
 		Class inPersistImpl = Class.forName(inputConfig.getProperty("persistence.class"));
-		input = PersistenceFactory.get(new PersistenceProperties(inputConfig)).configurePersist(daoClass, inPersistImpl);
+		String inTableName=(String)inputConfig.remove("tableName");
+		input = PersistenceFactory.get(new PersistenceProperties(inputConfig)).configurePersist(daoClass, inPersistImpl, inTableName);
 		completeSetup();
 	}
 

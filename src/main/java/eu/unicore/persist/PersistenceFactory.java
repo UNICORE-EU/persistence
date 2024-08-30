@@ -62,9 +62,9 @@ public class PersistenceFactory {
 	 * @return {@link Persist} implementation
 	 * @throws PersistenceException
 	 */
-	public <T> Persist<T> getPersist(Class<T> daoClass) throws PersistenceException{
+	public <T> Persist<T> getPersist(Class<T> daoClass, String tableName) throws PersistenceException{
 		try{
-			return configurePersist(daoClass, getPersistClass(daoClass));
+			return configurePersist(daoClass, getPersistClass(daoClass), tableName);
 		}catch(Exception e){
 			throw new PersistenceException(e);
 		}
@@ -78,9 +78,9 @@ public class PersistenceFactory {
 	 * @param pd
 	 * @throws Exception
 	 */
-	public <T> Persist<T> configurePersist(Class<T> daoClass, Class<? extends Persist<T>> implementation)
+	public <T> Persist<T> configurePersist(Class<T> daoClass, Class<? extends Persist<T>> implementation, String tableName)
 			throws Exception {
-		Persist<T>p = implementation.getConstructor(Class.class).newInstance(daoClass);
+		Persist<T>p = implementation.getConstructor(Class.class, String.class).newInstance(daoClass, tableName);
 		p.setConfigSource(config);
 		p.init();
 		return p;

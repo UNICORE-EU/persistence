@@ -38,7 +38,7 @@ public class TestH2PersistServerMode {
 	}
 
 	protected void createPersist(){
-		p = new H2Persist<>(Dao1.class);
+		p = new H2Persist<>(Dao1.class, null);
 		p.setServerMode(true);
 		PersistenceProperties cf=new PersistenceProperties();
 		cf.setProperty(PersistenceProperties.DB_PORT, port);

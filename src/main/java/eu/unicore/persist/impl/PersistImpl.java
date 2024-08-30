@@ -37,8 +37,8 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	// for logging purposes
 	protected String connectionURL = "";
 
-	public PersistImpl(Class<T> daoClass) {
-		super(daoClass);
+	public PersistImpl(Class<T> daoClass, String tableName) {
+		super(daoClass, tableName);
 	}
 
 	@Override

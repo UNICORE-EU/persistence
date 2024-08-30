@@ -28,7 +28,7 @@ public class TestPersistImplementations {
 	@Test
 	public void testSerializableWrapper()throws Exception, 
 	InstantiationException, IllegalAccessException, TimeoutException, InterruptedException{
-		H2Persist<Dao5>p = new H2Persist<>(Dao5.class);
+		H2Persist<Dao5>p = new H2Persist<>(Dao5.class, null);
 		PersistenceProperties config=new PersistenceProperties();
 		config.setDatabaseDirectory("target/test_data");
 		p.setConfigSource(config);

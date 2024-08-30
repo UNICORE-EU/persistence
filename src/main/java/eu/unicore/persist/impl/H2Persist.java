@@ -58,8 +58,8 @@ public class H2Persist<T> extends PersistImpl<T>{
 		cleanupThread.start();
 	}
 	
-	public H2Persist(Class<T> daoClass) {
-		super(daoClass);
+	public H2Persist(Class<T> daoClass, String tableName) {
+		super(daoClass, tableName);
 	}
 
 	@Override

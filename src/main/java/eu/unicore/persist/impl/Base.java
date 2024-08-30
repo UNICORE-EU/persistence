@@ -44,9 +44,12 @@ public abstract class Base<T> implements Persist<T>{
 
 	protected ObjectMarshaller<T> marshaller;
 
-	public Base(Class<T>daoClass){
+	public Base(Class<T>daoClass, String tableName){
 		this.daoClass = daoClass;
 		this.pd = PersistenceDescriptor.get(daoClass);
+		if(tableName!=null) {
+			pd.setTableName(tableName);
+		}
 	}
 
 	@Override

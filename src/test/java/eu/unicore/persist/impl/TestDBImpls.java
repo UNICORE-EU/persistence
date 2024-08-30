@@ -13,7 +13,7 @@ public class TestDBImpls {
 	public void testMySQL() throws Exception {
 		System.out.println(" ** MYSQL");
 		PersistenceProperties cf=new PersistenceProperties();
-		MySQLPersist<Dao1> p = new MySQLPersist<>(Dao1.class) {
+		MySQLPersist<Dao1> p = new MySQLPersist<>(Dao1.class, null) {
 			protected boolean runCheck(String sql) {
 				return true;
 			}
@@ -31,7 +31,7 @@ public class TestDBImpls {
 	public void testPGSQL() throws Exception {
 		System.out.println(" ** PGSQL");
 		PersistenceProperties cf=new PersistenceProperties();
-		PGSQLPersist<Dao1> p = new PGSQLPersist<>(Dao1.class) {
+		PGSQLPersist<Dao1> p = new PGSQLPersist<>(Dao1.class, null) {
 			protected boolean runCheck(String sql) {
 				return true;
 			}

@@ -33,7 +33,7 @@ public class PerftestH2Persist {
 
 	protected void createPersist() throws SQLException {
 		FileUtils.deleteQuietly(new File("target/test_data"));
-		p = new H2Persist<>(Dao1.class);
+		p = new H2Persist<>(Dao1.class, null);
 		PersistenceProperties props = new PersistenceProperties();
 		props.setDatabaseDirectory("target/test_data");
 		p.setConfigSource(props);

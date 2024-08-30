@@ -20,7 +20,7 @@ public class TestDataIntegrity {
 	@BeforeEach
 	public void init()throws Exception{
 		total=0;
-		p=new H2Persist<Dao3>(Dao3.class);
+		p = new H2Persist<Dao3>(Dao3.class, null);
 		PersistenceProperties props = new PersistenceProperties();
 		props.setDatabaseDirectory("target/test_data");
 		p.setConfigSource(props);

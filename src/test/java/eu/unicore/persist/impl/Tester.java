@@ -45,8 +45,8 @@ public class Tester {
 	
 	@SuppressWarnings("unchecked")
 	private void testBasicCRUD(boolean cache)throws Exception {
-		Persist<Dao1>p = (Persist<Dao1>)persistClass.getConstructor(Class.class).
-			newInstance(Dao1.class);
+		Persist<Dao1>p = (Persist<Dao1>)persistClass.getConstructor(Class.class, String.class).
+			newInstance(Dao1.class, null);
 		p.setCaching(cache);
 		if(properties!=null)p.setConfigSource(properties);
 		p.init();
@@ -101,8 +101,8 @@ public class Tester {
 	@SuppressWarnings("unchecked")
 	private void testAdditionalColumns(Boolean cache)throws Exception{
 		System.out.println("Testing "+persistClass.getName());
-		Persist<Dao2>p = (Persist<Dao2>)persistClass.getConstructor(Class.class).
-				newInstance(Dao2.class);
+		Persist<Dao2>p = (Persist<Dao2>)persistClass.getConstructor(Class.class, String.class).
+				newInstance(Dao2.class, null);
 		
 		p.setCaching(cache);
 		if(properties!=null)p.setConfigSource(properties);
@@ -141,8 +141,8 @@ public class Tester {
 
 	@SuppressWarnings("unchecked")
 	private void testFindIDs(Boolean cache)throws Exception{
-		Persist<Dao2>p = (Persist<Dao2>)persistClass.getConstructor(Class.class).
-				newInstance(Dao2.class);
+		Persist<Dao2>p = (Persist<Dao2>)persistClass.getConstructor(Class.class, String.class).
+				newInstance(Dao2.class, null);
 		p.setCaching(cache);
 		if(properties!=null)p.setConfigSource(properties);
 		p.init();
@@ -176,8 +176,8 @@ public class Tester {
 	
 	@SuppressWarnings("unchecked")
 	private void testLocking() throws Exception {
-		final Persist<Dao1>p = (Persist<Dao1>)persistClass.getConstructor(Class.class).
-				newInstance(Dao1.class);
+		final Persist<Dao1>p = (Persist<Dao1>)persistClass.getConstructor(Class.class, String.class).
+				newInstance(Dao1.class, null);
 		
 		if(properties!=null)p.setConfigSource(properties);
 		p.init();
@@ -220,8 +220,8 @@ public class Tester {
 	
 	@SuppressWarnings("unchecked")
 	private void testManualLocking() throws Exception {
-		final Persist<Dao1>p = (Persist<Dao1>)persistClass.getConstructor(Class.class).
-				newInstance(Dao1.class);
+		final Persist<Dao1>p = (Persist<Dao1>)persistClass.getConstructor(Class.class, String.class).
+				newInstance(Dao1.class, null);
 		if(properties!=null)p.setConfigSource(properties);
 		p.init();
 		p.removeAll();

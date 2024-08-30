@@ -19,8 +19,8 @@ public class InMemory<T> extends Base<T>{
 
 	protected Map<String,T>map;
 	
-	public InMemory(Class<T>daoClass){
-		super(daoClass);
+	public InMemory(Class<T>daoClass, String tableName){
+		super(daoClass, tableName);
 	}
 	
 	@Override
