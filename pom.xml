@@ -4,7 +4,7 @@
   <artifactId>persistence</artifactId>
   <name>Lightweight Object Persistence Layer</name>
   <inceptionYear>2008</inceptionYear>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>1.2.0</version>
   <parent>
     <groupId>eu.unicore</groupId>
     <artifactId>unicore-parent</artifactId>
@@ -38,7 +38,7 @@
     <connection>scm:git:git://github.com/UNICORE-EU/persistence.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/UNICORE-EU/persistence.git</developerConnection>
     <url>https://github.com/UNICORE-EU/persistence</url>
-    <tag>HEAD</tag>
+    <tag>persistence-1.2.0</tag>
   </scm>
 
   <dependencies>
