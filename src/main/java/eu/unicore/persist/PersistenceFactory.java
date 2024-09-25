@@ -54,11 +54,23 @@ public class PersistenceFactory {
 	}
 
 	/**
-	 * create a persistence handler for the given class, based solely on the annotations
-	 * present on the class
-	 * 
+	 * create a persistence handler for the given class
+	 *
 	 * @param <T> - the type of java class to be persisted
 	 * @param daoClass - the Java class to be persisted
+	 * @return {@link Persist} implementation
+	 * @throws PersistenceException
+	 */
+	public <T> Persist<T> getPersist(Class<T> daoClass) throws PersistenceException{
+		return getPersist(daoClass, null);
+	}
+
+	/**
+	 * create a persistence handler for the given class storing data in the named table
+	 *
+	 * @param <T> - the type of java class to be persisted
+	 * @param daoClass - the Java class to be persisted
+	 * @param tableName - if null, it will be inferred from the daoClass
 	 * @return {@link Persist} implementation
 	 * @throws PersistenceException
 	 */
@@ -69,7 +81,7 @@ public class PersistenceFactory {
 			throw new PersistenceException(e);
 		}
 	}
-	
+
 	/**
 	 * create an instance of the persistence class
 	 * 
