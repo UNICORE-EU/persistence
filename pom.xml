@@ -38,7 +38,7 @@
     <connection>scm:git:git://github.com/UNICORE-EU/persistence.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/UNICORE-EU/persistence.git</developerConnection>
     <url>https://github.com/UNICORE-EU/persistence</url>
-    <tag>#</tag>
+    <tag>persistence-1.2.1</tag>
   </scm>
 
   <dependencies>
