@@ -20,7 +20,7 @@ public class TestPersistenceFactory {
 	public void testGetPersistImplementation()throws Exception{
 		PersistenceProperties p = new PersistenceProperties();
 		p.setProperty(PersistenceProperties.DB_IMPL+".Dao1", InMemory.class.getName());
-		Class<?>clazz = PersistenceFactory.get(p).getPersistClass(Dao1.class);
+		Class<?>clazz = PersistenceFactory.get(p).getPersistClass(Dao1.class, null);
 		assertTrue(clazz.isAssignableFrom(InMemory.class));
 	}
 
@@ -31,7 +31,7 @@ public class TestPersistenceFactory {
 		PersistenceProperties p=new PersistenceProperties();
 		p.setProperty(PersistenceProperties.DB_DIRECTORY, "./"+tmp.getPath());
 		p.setProperty(PersistenceProperties.DB_IMPL+".Dao1", H2Persist.class.getName());
-		Class<?>clazz = PersistenceFactory.get(p).getPersistClass(Dao1.class);
+		Class<?>clazz = PersistenceFactory.get(p).getPersistClass(Dao1.class, null);
 		assert clazz.isAssignableFrom(H2Persist.class);
 		Persist<Dao1> persist=PersistenceFactory.get(p).getPersist(Dao1.class);
 		persist.shutdown();
@@ -43,7 +43,7 @@ public class TestPersistenceFactory {
 	public void testConfigurePersistImplementation()throws Exception{
 		PersistenceProperties p=new PersistenceProperties();
 		p.setProperty(PersistenceProperties.FILE, "src/test/resources/persistence.properties");
-		Class<?>clazz=PersistenceFactory.get(p).getPersistClass(Dao1.class);
+		Class<?>clazz=PersistenceFactory.get(p).getPersistClass(Dao1.class, null);
 		assertTrue(clazz.isAssignableFrom(MySQLPersist.class));
 	}
 
@@ -52,7 +52,7 @@ public class TestPersistenceFactory {
 		PersistenceProperties p=new PersistenceProperties();
 		p.setProperty(PersistenceProperties.FILE, "src/test/resources/persistence.properties.DOESNOTEXIST");
 		assertThrows(ConfigurationException.class, ()->{
-			PersistenceFactory.get(p).getPersistClass(Dao1.class);	
+			PersistenceFactory.get(p).getPersistClass(Dao1.class, null);	
 		});
 	}
 

@@ -28,10 +28,6 @@ public class PersistenceFactory {
 	private PersistenceFactory(PersistenceProperties config){
 		this.config = config;
 	}
-	
-	public PersistenceProperties getConfig() {
-		return config;
-	}
 
 	public static synchronized PersistenceFactory get(PersistenceProperties config){
 		PersistenceProperties realConfig = null;
@@ -51,6 +47,13 @@ public class PersistenceFactory {
 			realConfig = config;
 		}
 		return new PersistenceFactory(realConfig);
+	}
+
+	/**
+	 * returns the effective configuration
+	 */
+	public PersistenceProperties getConfig() {
+		return config;
 	}
 
 	/**
@@ -76,7 +79,7 @@ public class PersistenceFactory {
 	 */
 	public <T> Persist<T> getPersist(Class<T> daoClass, String tableName) throws PersistenceException{
 		try{
-			return configurePersist(daoClass, getPersistClass(daoClass), tableName);
+			return configurePersist(daoClass, getPersistClass(daoClass, tableName), tableName);
 		}catch(Exception e){
 			throw new PersistenceException(e);
 		}
@@ -87,7 +90,7 @@ public class PersistenceFactory {
 	 * 
 	 * @param daoClass
 	 * @param implementation
-	 * @param pd
+	 * @param tableName
 	 * @throws Exception
 	 */
 	public <T> Persist<T> configurePersist(Class<T> daoClass, Class<? extends Persist<T>> implementation, String tableName)
@@ -99,9 +102,11 @@ public class PersistenceFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <T> Class<? extends Persist<T>> getPersistClass(Class<T> daoClass)throws ClassNotFoundException{
-		String tableName = ClassScanner.getTableName(daoClass);
-		String clazz = config.getSubkeyValue(PersistenceProperties.DB_IMPL,tableName);
+	<T> Class<? extends Persist<T>> getPersistClass(Class<T> daoClass, String tableName)throws ClassNotFoundException{
+		if(tableName==null) {
+			tableName = ClassScanner.getTableName(daoClass);
+		}
+		String clazz = config.getSubkeyValue(PersistenceProperties.DB_IMPL, tableName);
 		if(clazz==null){
 			clazz = H2Persist.class.getName();
 		}

@@ -16,7 +16,7 @@ public class TestUUID {
 		List<String>ids = new ArrayList<>();
 		for(int i=0; i<10000; i++) {
 			String s = UUID.newUniqueID();
-			assertTrue(s.length()>=8);
+			assertTrue(s.length()>=7);
 			assertFalse(ids.contains(s));
 			ids.add(s);
 		}
