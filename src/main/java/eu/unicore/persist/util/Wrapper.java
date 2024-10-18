@@ -17,34 +17,20 @@ import com.google.gson.JsonParseException;
  */
 public class Wrapper<T extends Serializable> {
 
-	private T content;
-	
-	private String className;
-	
+	private final T content;
+
+	@SuppressWarnings("unused")
+	private final String className;
+
 	public Wrapper(T target){
 		this.content = target;
-		if(target!=null){
-			className = target.getClass().getName();
-		}
+		className = target!=null ? target.getClass().getName():null;
 	}
-	
+
 	public T get(){
-		if(className!=null){
-			try{
-				return content;
-			}catch(Exception e){
-				throw new RuntimeException(e);
-			}
-		}
-		else{
-			return null;
-		}
+		return content;
 	}
-	
-	public String toString(){
-		return "Wrapper["+String.valueOf(content)+"]";
-	}
-	
+
 	public static class WrapperConverter implements GSONConverter{
 
 		@Override
@@ -61,11 +47,10 @@ public class Wrapper<T extends Serializable> {
 		public boolean isHierarchy() {
 			return true;
 		}
-		
 	}
-	
+
 	private static final WrapperAdapter adapter=new WrapperAdapter();
-	
+
 	@SuppressWarnings("rawtypes")
 	public static class WrapperAdapter implements JsonDeserializer<Wrapper>{
 
@@ -92,7 +77,6 @@ public class Wrapper<T extends Serializable> {
 			}
 			return new Wrapper(target);
 		}
-
 	}
 
 	public static final Map<String,String> updates = new HashMap<>();

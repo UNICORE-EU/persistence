@@ -1,12 +1,21 @@
 package eu.unicore.persist.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.io.Serializable;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com.google.gson.JsonParseException;
+
 import eu.unicore.persist.PersistenceProperties;
+import eu.unicore.persist.util.Wrapper;
 
 
 /**
@@ -41,26 +50,61 @@ public class TestPersistImplementations {
 		test.setData(null);
 
 		p.write(test);
-		assert p.getIDs().size()==1;
+		assertEquals(1, p.getIDs().size());
 
 		Dao5 test1 = p.read("1");
-		assert test1!=null;
-		assert test1.getId().equals("1");
-		assert test1.getData()==null;
+		assertNotNull(test1);
+		assertEquals("1", test1.getId());
+		assertNull(test1.getData());
 		
 		test=new Dao5();
 		test.setId("2");
 		test.setData(123);
 
 		p.write(test);
-		assert p.getIDs().size()==2;
+		assertEquals(2, p.getIDs().size());
 
 		test1 = p.read("2");
-		assert test1!=null;
-		assert test1.getId().equals("2");
-		assert test1.getData().equals(Integer.valueOf(123));
+		assertNotNull(test1);
+		assertEquals("2", test1.getId());
+		assertEquals(123, test1.getData());
 
-		p.shutdown();
+		p.removeAll();
+		
+		test=new Dao5();
+		test.setId("1");
+		test.setData(new M1(123));
+		p.write(test);
+
+		Wrapper.updates.put(M1.class.getName(), M2.class.getName());
+		Dao5 testRenamed = p.read("1");
+		assertEquals(123, ((M2)testRenamed.getData()).getData());
+		Wrapper.updates.clear();
+		
+		Wrapper.updates.put(M1.class.getName(), "nosuchclass_"+M2.class.getName());
+		assertThrows(JsonParseException.class, ()->p.read("1"));
+	}
+
+	public static class M1 implements Serializable{
+		public static final long serialVersionUID=1l;
+		private int data;
+		public M1(int data) {
+			this.data = data;
+		}
+		public int getData() {
+			return data;
+		}
+	}
+
+	public static class M2 implements Serializable {
+		public static final long serialVersionUID=1l;
+		private int data;
+		public M2(int data) {
+			this.data = data;
+		}
+		public int getData() {
+			return data;
+		}
 	}
 
 }

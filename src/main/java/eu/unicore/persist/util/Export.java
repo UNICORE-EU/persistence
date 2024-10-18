@@ -1,6 +1,8 @@
 package eu.unicore.persist.util;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.SQLException;
@@ -18,11 +20,8 @@ import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.persist.impl.PersistImpl;
 
 /**
- * Exports a database to JSON<br/>
- * 
- * The output is written to the console (so it can be easily
- * redirected to a file)
- * 
+ * Exports a database to a JSON file
+ *
  * @author schuller
  */
 @SuppressWarnings("rawtypes")
@@ -33,26 +32,26 @@ public class Export {
 	private Writer output;
 	Class daoClass;
 
-	public Export(PersistImpl<?> input)throws Exception{
+	public Export(PersistImpl<?> input, String outputFile)throws Exception{
 		this.input = input;
 		daoClass=input.getDaoClass();
-		completeSetup();
+		completeSetup(outputFile);
 	}
 
 	@SuppressWarnings("unchecked")
-	public Export(Properties inputConfig)throws Exception{
+	public Export(Properties inputConfig, String outputFile)throws Exception{
 		daoClass = Class.forName((String)inputConfig.remove("class"));
 		Class inPersistImpl = Class.forName(inputConfig.getProperty("persistence.class"));
 		String inTableName=(String)inputConfig.remove("tableName");
 		input = PersistenceFactory.get(new PersistenceProperties(inputConfig)).configurePersist(daoClass, inPersistImpl, inTableName);
-		completeSetup();
+		completeSetup(outputFile);
 	}
 
-	private void completeSetup(){
+	private void completeSetup(String outputFile) throws FileNotFoundException {
 		GsonBuilder builder = new GsonBuilder();
 		GSONUtil.registerTypeConverters(daoClass, builder);
 		gson = builder.create();
-		output=new OutputStreamWriter(System.out);
+		output = new OutputStreamWriter(new FileOutputStream(outputFile));
 	}
 
     @SuppressWarnings("unchecked")
@@ -60,15 +59,14 @@ public class Export {
     	JsonWriter writer = new JsonWriter(output);
 		int errors=0;
 		Collection<String>ids=input.getIDs();
-		System.out.print("Will export "+ids.size()+ " entries.");
-		//convert
 		writer.beginArray();
-		for(Object s: ids){
+		int n = 0;
+		for(String s: ids){
 			System.out.print("Converting "+s+ " ...");
 			try{
-				Object in=input.getForUpdate((String)s);
-				gson.toJson(in,daoClass,writer);
+				gson.toJson(input.read(s), daoClass,writer);
 				System.out.println("... OK");
+				n++;
 			}catch(Exception ex){
 				System.out.println("... error: "+ex.getMessage());
 				errors++;
@@ -76,7 +74,7 @@ public class Export {
 		}
 		writer.endArray();
 		writer.close();
-		System.out.println("Done, "+errors+" errors occured.");
+		System.out.println("Done, exported "+n+" entries, "+errors+" errors occured.");
 	}
 
     public void shutdown() throws PersistenceException, SQLException {
@@ -88,21 +86,21 @@ public class Export {
 	}
 
 	/**
-	 * main class, having as (optional) argument the input configuration file name
-	 * System properties are taken into account as well
-	 */ 
+	 * Arguments:
+	 *  1: input configuration file name
+	 *  2: output file name
+	 */
 	public static void main(String[] args)throws Exception {
 		System.out.println("*** Convert utility *** ");
-		//setup input database
-		Properties inputConfig=new Properties();
-		if(args.length>0){
-			inputConfig.load(new FileInputStream(args[0]));
+		if(args.length<2){
+			System.err.println("Require args: inputConfig outputFilename");
+			System.exit(1);
 		}
+		Properties inputConfig=new Properties();
+		inputConfig.load(new FileInputStream(args[0]));
 		inputConfig.putAll(System.getProperties());
-		
-		Export export=new Export(inputConfig);
+		Export export=new Export(inputConfig, args[1]);
 		export.doExport();
 		export.shutdown();
 	}
-
 }

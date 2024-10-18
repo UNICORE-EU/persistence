@@ -18,33 +18,29 @@ import eu.unicore.persist.PersistenceFactory;
 import eu.unicore.persist.PersistenceProperties;
 
 /**
- * Exports a database to JSON<br/>
- * 
- * The output is written to the console (so it can be easily
- * redirected to a file)
- * 
+ * Imports a database from a JSON file
+ *
  * @author schuller
  */
 @SuppressWarnings("rawtypes")
 public class Import {
 
-	private Gson gson;
-	private Reader input;
-	private Class daoClass;
-	private Persist output;
+	private final Gson gson;
+	private final Reader input;
+	private final Class daoClass;
+	private final Persist output;
 
 	public Import(File inFile, Properties outputConfig)throws Exception{
-		setup(outputConfig);
-		input=new InputStreamReader(new FileInputStream(inFile));
+		this(new InputStreamReader(new FileInputStream(inFile)), outputConfig);
 	}
 
 	public Import(String json, Properties outputConfig)throws Exception{
-		setup(outputConfig);
-		input=new StringReader(json);
+		this(new StringReader(json), outputConfig);
 	}
-
+	
 	@SuppressWarnings("unchecked")
-	private void setup(Properties outputConfig)throws Exception{
+	private Import(Reader reader, Properties outputConfig) throws Exception {
+		this.input = reader;
 		daoClass = Class.forName((String)outputConfig.remove("class"));
 		Class inPersistImpl = Class.forName(outputConfig.getProperty("persistence.class"));
 		String inTableName=(String)outputConfig.remove("tableName");

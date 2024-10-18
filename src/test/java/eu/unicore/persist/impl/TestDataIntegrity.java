@@ -70,5 +70,5 @@ public class TestDataIntegrity {
 			assertEquals(0, test.getData().intValue());
 		}	
 	}
-	
+
 }
