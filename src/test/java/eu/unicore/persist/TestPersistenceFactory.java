@@ -32,10 +32,10 @@ public class TestPersistenceFactory {
 		p.setProperty(PersistenceProperties.DB_DIRECTORY, "./"+tmp.getPath());
 		p.setProperty(PersistenceProperties.DB_IMPL+".Dao1", H2Persist.class.getName());
 		Class<?>clazz = PersistenceFactory.get(p).getPersistClass(Dao1.class, null);
-		assert clazz.isAssignableFrom(H2Persist.class);
+		assertTrue(clazz.isAssignableFrom(H2Persist.class));
 		Persist<Dao1> persist=PersistenceFactory.get(p).getPersist(Dao1.class);
 		persist.shutdown();
-		assert tmp.listFiles().length>0;
+		assertTrue(tmp.listFiles().length>0);
 		FileUtils.deleteQuietly(tmp);
 	}
 

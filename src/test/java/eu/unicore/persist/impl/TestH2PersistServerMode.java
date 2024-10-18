@@ -83,7 +83,7 @@ public class TestH2PersistServerMode {
 		start=System.currentTimeMillis();
 		readSomeRandomEntries(numberOfInstances);
 		System.out.println("Time for reading: "+(System.currentTimeMillis()-start));
-		//select subset woth other="true"
+		//select subset with other="true"
 		start=System.currentTimeMillis();
 		Collection<String> ids=p.getIDs("other", Boolean.TRUE);
 		assertNotNull(ids);
@@ -96,7 +96,7 @@ public class TestH2PersistServerMode {
 	protected void readSomeRandomEntries(int numberOfInstances)throws Exception{
 		for(int i=0;i<50;i++){
 			Dao1 e=p.read(String.valueOf(rand.nextInt(numberOfInstances)));
-			assert e!=null;
+			assertNotNull(e);
 		}
 	}
 

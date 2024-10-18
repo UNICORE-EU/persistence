@@ -1,5 +1,8 @@
 package eu.unicore.persist.impl;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -79,8 +82,8 @@ public class PerftestH2Persist {
 		//select subset with other="true"
 		start=System.currentTimeMillis();
 		Collection<String> ids=p.getIDs("other", Boolean.TRUE);
-		assert ids!=null;
-		assert ids.size()>0;
+		assertNotNull(ids);
+		assertTrue(ids.size()>0);
 		System.out.println("Time for selecting subset: "+(System.currentTimeMillis()-start));
 		System.out.println("Read cache hits: "+p.getCacheHits());
 		p.shutdown();
@@ -89,7 +92,7 @@ public class PerftestH2Persist {
 	protected void readSomeRandomEntries(int numberOfInstances)throws Exception{
 		for(int i=0;i<50;i++){
 			Dao1 e=p.read(String.valueOf(rand.nextInt(numberOfInstances)));
-			assert e!=null;
+			assertNotNull(e);
 		}
 	}
 }

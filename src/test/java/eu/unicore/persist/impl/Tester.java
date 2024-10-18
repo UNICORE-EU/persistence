@@ -1,5 +1,11 @@
 package eu.unicore.persist.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -59,42 +65,42 @@ public class Tester {
 		test.setId("1");
 		test.setData("testdata");
 		p.write(test);
-		assert p.getIDs().size()==1;
+		assertEquals(1, p.getIDs().size());
 
 		Dao1 test1 = p.getForUpdate("1");
-		assert test1!=null;
-		assert test1.getData().equals("testdata");
-		assert test1.getId().equals("1");
+		assertNotNull(test1);
+		assertEquals("testdata", test1.getData());
+		assertEquals("1", test1.getId());
 
 		test1.setData("testdata-changed");
 		p.write(test1);
-		assert p.getIDs().size()==1;
+		assertEquals(1, p.getIDs().size());
 
 		test1 = p.read("1");
-		assert test1!=null;
-		assert test1.getData().equals("testdata-changed");
-		assert test1.getId().equals("1");
+		assertNotNull(test1);
+		assertEquals("testdata-changed", test1.getData());
+		assertEquals("1", test1.getId());
 
 		test=new Dao1();
 		test.setId("2");
 		test.setData("testdata-2");
 		p.write(test);
-		assert p.getIDs().size()==2;
+		assertEquals(2, p.getIDs().size());
 		test=p.read("2");
-		assert test!=null;
-		assert test.getData().equals("testdata-2");
-		assert test.getId().equals("2");
-		assert p.getRowCount()==2;
+		assertNotNull(test);
+		assertEquals("testdata-2", test.getData());
+		assertEquals("2", test.getId());
+		assertEquals(2, p.getRowCount());
 		p.remove("1");
-		assert p.getIDs().size()==1;
-		assert p.getRowCount()==1;
+		assertEquals(1, p.getIDs().size());
+		assertEquals(1, p.getRowCount());
 		p.remove("2");
-		assert p.getIDs().size()==0;
-		assert p.getRowCount()==0;
+		assertEquals(0, p.getIDs().size());
+		assertEquals(0, p.getRowCount());
 		test=p.read("1");
-		assert test==null;
+		assertNull(test);
 		test=p.read("2");
-		assert test==null;
+		assertNull(test);
 		p.shutdown();
 	}
 	
@@ -119,11 +125,10 @@ public class Tester {
 		p.write(test);
 
 		Dao2 test1=p.read("1");
-		assert test1!=null;
-		assert test1.getField().equals("new-content");
-		assert p.getIDs("foo", "new-content").size()==1;
-		assert p.getRowCount("foo", "new-content")==1;
-
+		assertNotNull(test1);
+		assertEquals("new-content", test1.getField());
+		assertEquals(1, p.getIDs("foo", "new-content").size());
+		assertEquals(1, p.getRowCount("foo", "new-content"));
 
 		Dao2 test2=new Dao2();
 		test2.setId("2");
@@ -131,10 +136,10 @@ public class Tester {
 		p.write(test2);
 
 		Map<String,String>values=p.getColumnValues("foo");
-		assert values!=null;
-		assert 2==values.size();
-		assert "new-content".equals(values.get("1"));
-		assert "bar".equals(values.get("2"));
+		assertNotNull(values);
+		assertEquals(2, values.size());
+		assertEquals("new-content", values.get("1"));
+		assertEquals("bar", values.get("2"));
 
 		p.shutdown();
 	}
@@ -165,12 +170,11 @@ public class Tester {
 		p.write(test3);
 
 		List<String> ids = p.findIDs("foo", "tag2");
-		assert ids.size() == 2;
+		assertEquals(2, ids.size());
 		
 		ids = p.findIDs("foo", "tag2", "tag1");
-		assert ids.size() == 1;
-		
-		
+		assertEquals(1, ids.size());
+
 		p.shutdown();
 	}
 	
@@ -187,7 +191,7 @@ public class Tester {
 		test.setId("1");
 		test.setData("testdata");
 		p.write(test);
-		assert p.getIDs().size()==1;
+		assertEquals(1, p.getIDs().size());
 		
 		test = p.getForUpdate("1");
 		final AtomicBoolean OK = new AtomicBoolean(true);
@@ -212,7 +216,7 @@ public class Tester {
 			Thread t = new Thread(r);
 			t.start();
 			t.join();
-			assert OK.get()==true;
+			assertTrue(OK.get());
 		}finally{
 			p.unlock(test);
 		}
@@ -225,37 +229,33 @@ public class Tester {
 		if(properties!=null)p.setConfigSource(properties);
 		p.init();
 		p.removeAll();
-
 		Dao1 test=new Dao1();
 		test.setId("1");
 		test.setData("testdata");
 		p.write(test);
-		assert p.getIDs().size()==1;
-		
+		assertEquals(1, p.getIDs().size());
 		test = p.read("1");
 		p.lock("1", 100, TimeUnit.MILLISECONDS);
 		final AtomicBoolean CAN_READ = new AtomicBoolean(false);
-		Runnable r = new Runnable(){
-			public void run() {
-				try{
-					Dao1 test2 = p.tryGetForUpdate("1");
-					CAN_READ.set(test2!=null);
-					if(test2!=null) {
-						p.unlock(test2);
-					}
-				}catch(Exception ex) {}
-			}
+		Runnable r = () -> {
+			try{
+				Dao1 test2 = p.tryGetForUpdate("1");
+				CAN_READ.set(test2!=null);
+				if(test2!=null) {
+					p.unlock(test2);
+				}
+			}catch(Exception ex) {}
 		};
 		Thread t = new Thread(r);
 		t.start();
 		t.join();
-		assert !CAN_READ.get();
-		
+		assertFalse(CAN_READ.get());
+
 		p.unlock(test);
 		t = new Thread(r);
 		t.start();
 		t.join();
-		assert CAN_READ.get();
+		assertTrue(CAN_READ.get());
 	}
 
 }

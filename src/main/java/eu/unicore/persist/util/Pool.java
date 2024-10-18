@@ -28,13 +28,13 @@ public class Pool {
 
 	private static final Logger logger = LogManager.getLogger("unicore.persistence.Pool");
 
-	private ConnectionPoolDataSource dataSource;
-	private int maxConnections;
-	private int timeout;
-	private Semaphore semaphore;
-	private Queue<PooledConnection> recycledConnections;
+	private final ConnectionPoolDataSource dataSource;
+	private final int maxConnections;
+	private final int timeout;
+	private final Semaphore semaphore;
+	private final Queue<PooledConnection> recycledConnections;
 	private int activeConnections;
-	private PoolConnectionEventListener poolConnectionEventListener;
+	private final PoolConnectionEventListener poolConnectionEventListener;
 	private boolean isDisposed;
 
 	/**
