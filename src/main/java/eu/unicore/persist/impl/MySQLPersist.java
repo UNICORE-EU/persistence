@@ -110,7 +110,7 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 
 	@Override
 	protected boolean columnExists(String column) throws PersistenceException, SQLException {
-		return runCheck( String.format("SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE "
+		return runCheck( String.format("SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE "
 				+ "table_schema='%s' "
 				+ "AND table_name='%s' "
 				+ "AND column_name='%s'",
