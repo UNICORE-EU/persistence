@@ -93,9 +93,7 @@ public abstract class Base<T> implements Persist<T>{
 
 	private void initLockSupport() throws ConfigurationException {
 		if(lockSupport!=null)return;
-		String table=pd.getTableName();
-		//init lock handler 
-		lockSupport=new LockSupport(table);
+		lockSupport = new LockSupport(pd.getTableName());
 	}
 
 	/**
@@ -134,8 +132,8 @@ public abstract class Base<T> implements Persist<T>{
 	public void lock(String id, long timeout, TimeUnit unit)throws TimeoutException, InterruptedException {
 		Lock lock=lockSupport.getOrCreateLock(id);
 		if(!lock.tryLock(timeout, unit)){
-			String msg="Time out reached: lock for table= "+pd.getTableName()+" uid=<"+id+"> could not be acquired";
-			throw new TimeoutException(msg);
+			throw new TimeoutException("Time out reached: lock for table= "+pd.getTableName()
+										+" uid=<"+id+"> could not be acquired");
 		}
 	}
 
@@ -154,8 +152,8 @@ public abstract class Base<T> implements Persist<T>{
 			}
 		}
 		else {
-			String msg="Time out reached: lock for table= "+pd.getTableName()+" uid=<"+id+"> could not be acquired";
-			throw new TimeoutException(msg);
+			throw new TimeoutException("Time out reached: lock for table= "+pd.getTableName()
+										+" uid=<"+id+"> could not be acquired");
 		}
 	}
 

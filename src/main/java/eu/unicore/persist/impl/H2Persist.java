@@ -132,22 +132,17 @@ public class H2Persist<T> extends PersistImpl<T>{
 		if(connectionURL!=null){
 			return connectionURL;
 		}
-
 		String tableName=pd.getTableName();
 		String dir=null;
-
 		if(serverMode==null){
 			serverMode=config==null?false:Boolean.parseBoolean(config.getSubkeyValue(PersistenceProperties.H2_SERVER_MODE, tableName));
 		}
-
 		if(config!=null){
 			dir=config.getSubkeyValue(PersistenceProperties.DB_DIRECTORY,tableName);
 		}
-
 		if(!(new File(dir).isAbsolute())){
 			dir="./"+dir;
 		}
-
 		String params="DB_CLOSE_ON_EXIT=FALSE";
 		String additionalParams=config==null?null:config.getSubkeyValue(PersistenceProperties.H2_OPTIONS, tableName);
 		if(additionalParams!=null){
@@ -161,8 +156,6 @@ public class H2Persist<T> extends PersistImpl<T>{
 		}else{
 			connectionURL= "jdbc:h2:file:"+dir+File.separator+id+";"+params;
 		}
-
-		logger.info("Connecting to: "+connectionURL);
 		return connectionURL;
 	}
 
@@ -173,7 +166,7 @@ public class H2Persist<T> extends PersistImpl<T>{
 
 	@Override
 	protected String getDefaultDriverName(){
-		return "org.h2.Driver";
+		return org.h2.Driver.class.getName();
 	}
 
 	@Override

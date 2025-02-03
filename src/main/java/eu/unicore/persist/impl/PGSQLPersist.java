@@ -50,7 +50,7 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 		}
 		return cmds;
 	}
-	
+
 	@Override
 	protected String getSQLStringType(){
 		return "TEXT";
@@ -58,12 +58,12 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 
 	@Override
 	protected String getDefaultDriverName(){
-		return "org.postgresql.Driver";
+		return org.postgresql.Driver.class.getName();
 	}
 
 	@Override
 	protected int getDefaultPort() {
-		return  5432;
+		return 5432;
 	}
 
 	@Override
@@ -83,7 +83,6 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 			ds.setSslmode("allow");
 		}
 		connectionURL = String.format("jdbc:postgresql://%s:%d/%s?ssl=%s", sqlHost, port, getDatabaseName(), sslMode);
-		logger.info("Connecting to: {}", connectionURL);
 		return ds;
 	}
 
@@ -93,7 +92,7 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 		try{
 			c=super.getConnection();
 		}catch(Exception se){
-			logger.warn("Error when getting a PGSQL connection: "+se.getMessage()+", trying to reconnect.");
+			logger.warn("Error when getting a PGSQL connection: {}, trying to reconnect.",se.getMessage());
 			try{
 				pool.cleanupPooledConnections();
 			}catch(Exception ex){/*ignored*/}
@@ -104,19 +103,15 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 
 	@Override
 	protected boolean columnExists(String column) throws PersistenceException, SQLException {
-		String tb = pd.getTableName();
-		String sql="SELECT 1 FROM information_schema.columns WHERE "
-				+ "table_name='"+tb+"' AND column_name='"+column+"'";
-		return runCheck(sql);
+		return runCheck(String.format("SELECT 1 FROM pg_tables WHERE "
+				+ "schemaname='public' AND tablename='%s' AND column_name='%s'",
+				pd.getTableName(), column));
 	}
-	
+
 	@Override
 	protected boolean tableExists() throws PersistenceException, SQLException {
-		String tb = pd.getTableName();
-		String sql="SELECT 1 FROM pg_tables WHERE "
-				+ "schemaname='public' "
-				+ "AND tablename='"+tb+"'";
-		return runCheck(sql);
+		return runCheck(String.format("SELECT 1 FROM pg_tables WHERE "
+				+ "schemaname='public' AND tablename='%s'", pd.getTableName()));
 	}
 
 	protected boolean runCheck(String sql) throws SQLException, PersistenceException {
@@ -128,5 +123,5 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 			}
 		}
 	}
-	
+
 }

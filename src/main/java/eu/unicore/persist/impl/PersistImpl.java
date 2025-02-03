@@ -388,7 +388,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 			throw new IllegalStateException("Must ConnectionPoolDataSource");
 		}
 		pool=new Pool(ds,max_connections,timeout);
-		logger.info("Connection pooling enabled, maxConnections="+max_connections+" timeout="+timeout);
+		logger.info("Connection pooling enabled, maxConnections={} timeout={}", max_connections, timeout);
 	}
 
 	protected synchronized Connection getConnection()throws SQLException {

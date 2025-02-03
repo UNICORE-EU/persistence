@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.sql.ConnectionPoolDataSource;
-import javax.sql.DataSource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,7 +54,7 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 		}
 		return cmds;
 	}
-	
+
 	@Override
 	protected String getSQLStringType(){
 		return "LONGTEXT";
@@ -68,7 +67,7 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 
 	@Override
 	protected String getDefaultDriverName(){
-		return "com.mysql.cj.jdbc.Driver";
+		return com.mysql.cj.jdbc.Driver.class.getName();
 	}
 
 	@Override
@@ -88,17 +87,11 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 		ds.setAutoReconnect(true);
 		ds.setAutoReconnectForPools(true);
 		ds.setServerTimezone(tz);
-		//for info purposes, create and log the connection string
 		connectionURL = String.format("jdbc:mysql://%s:%s/%s?ssl=%s&serverTimezone=%s",
 				sqlHost, getDatabaseServerPort(), getDatabaseName(), sslMode, tz);
-		logger.info("Connecting to: {}", connectionURL);
 		return ds;
 	}
-	
-	protected DataSource getDataSource(){
-		return null;
-	}
-	
+
 	@Override
 	protected Connection getConnection() throws SQLException {
 		Connection c=null;
@@ -117,23 +110,21 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 
 	@Override
 	protected boolean columnExists(String column) throws PersistenceException, SQLException {
-		String tb = pd.getTableName();
-		String sql="SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE "
-				+ "table_schema='"+getDatabaseName()+"'"
-				+ " AND table_name='"+tb+
-				"' AND column_name='"+column+"'";
-		return runCheck(sql);
+		return runCheck( String.format("SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE "
+				+ "table_schema='%s' "
+				+ "AND table_name='%s' "
+				+ "AND column_name='%s'",
+				getDatabaseName(), pd.getTableName(), column));
 	}
-	
+
 	@Override
 	protected boolean tableExists() throws PersistenceException, SQLException {
-		String tb = pd.getTableName();
-		String sql="SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE "
-				+ "table_schema='"+getDatabaseName()+"'"
-				+ "AND table_name='"+tb+"'";
-		return runCheck(sql);
+		return runCheck( String.format("SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE "
+				+ "table_schema='%s' "
+				+ "AND table_name='%s'",
+				getDatabaseName(), pd.getTableName()));
 	}
-	
+
 	protected boolean runCheck(String sql) throws SQLException{
 		try(Connection conn = getConnection()){
 			synchronized(conn){
@@ -143,5 +134,5 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 			}
 		}
 	}
-	
+
 }
