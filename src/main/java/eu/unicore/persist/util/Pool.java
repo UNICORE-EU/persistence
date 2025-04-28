@@ -12,9 +12,6 @@ import javax.sql.ConnectionEventListener;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 /**
  * A simple standalone JDBC connection pool manager.
  * <p>
@@ -25,8 +22,6 @@ import org.apache.logging.log4j.Logger;
  * Multi-licensed: EPL/LGPL/MPL.
  */
 public class Pool {
-
-	private static final Logger logger = LogManager.getLogger("unicore.persistence.Pool");
 
 	private final ConnectionPoolDataSource dataSource;
 	private final int maxConnections;
@@ -76,21 +71,18 @@ public class Pool {
 	 * which it will become unusable
 	 */
 	public synchronized void dispose() throws SQLException {
-		if (isDisposed)
-			return;
-		isDisposed = true;
-		SQLException e = null;
-		while (!recycledConnections.isEmpty()) {
-			PooledConnection pconn = recycledConnections.remove();
-			try {
-				pconn.close();
-			} catch (SQLException e2) {
-				if (e == null)
+		if (!isDisposed) {
+			isDisposed = true;
+			SQLException e = null;
+			while (!recycledConnections.isEmpty()) {
+				try {
+					recycledConnections.remove().close();
+				} catch (SQLException e2) {
 					e = e2;
+				}
 			}
+			if (e!=null)throw e;
 		}
-		if (e != null)
-			throw e;
 	}
 
 	/**
@@ -100,21 +92,17 @@ public class Pool {
 	 */
 	public synchronized void cleanupPooledConnections() throws SQLException {
 		if (isDisposed) throw new IllegalStateException("Pool is disposed.");
-		
 		SQLException e = null;
 		while (!recycledConnections.isEmpty()) {
-			PooledConnection pconn = recycledConnections.remove();
 			try {
-				pconn.close();
+				recycledConnections.remove().close();
 			} catch (SQLException e2) {
-				if (e == null)
-					e = e2;
+				e = e2;
 			}
 		}
-		if (e != null)
-			throw e;
+		if (e!=null)throw e;
 	}
-	
+
 	/**
 	 * Retrieves a connection from the connection pool. If
 	 * <code>maxConnections</code> connections are already in use, the method
@@ -186,16 +174,10 @@ public class Pool {
 			throw new AssertionError();
 		activeConnections--;
 		semaphore.release();
-		closeConnectionNoEx(pconn);
-		assertInnerState();
-	}
-
-	private void closeConnectionNoEx(PooledConnection pconn) {
 		try {
 			pconn.close();
-		} catch (SQLException e) {
-			logger.error("Error while closing database connection: " + e.toString(), e);
-		}
+		} catch (Exception e) {}
+		assertInnerState();
 	}
 
 	private void assertInnerState() {
