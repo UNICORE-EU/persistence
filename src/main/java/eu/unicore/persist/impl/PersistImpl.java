@@ -42,10 +42,10 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	}
 
 	@Override
-	public void init()throws PersistenceException, SQLException {
+	public void init()throws PersistenceException {
 		super.init();
-		String table=pd.getTableName();
-		int maxConn=config==null? 1 :
+		String table = pd.getTableName();
+		int maxConn = config==null? 2 :
 			Integer.parseInt(config.getSubkeyValue(PersistenceProperties.DB_POOL_MAXSIZE,table));
 		int timeout=config==null ? Integer.MAX_VALUE:
 			Integer.parseInt(config.getSubkeyValue(PersistenceProperties.DB_POOL_TIMEOUT, table));
@@ -54,7 +54,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	}
 
 	@Override
-	public void shutdown()throws PersistenceException, SQLException {
+	public void shutdown()throws PersistenceException {
 		try {
 			_execute(getSQLShutdown());
 		}
@@ -66,12 +66,12 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	}
 
 	@Override
-	public List<String> getIDs()throws PersistenceException, SQLException {
+	public List<String> getIDs()throws PersistenceException {
 		return getIDs(false);
 	}
-	
+
 	@Override
-	public List<String> getIDs(boolean oldestFirst)throws PersistenceException, SQLException {
+	public List<String> getIDs(boolean oldestFirst)throws PersistenceException {
 		List<String>result=new ArrayList<>();
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
@@ -83,12 +83,14 @@ public abstract class PersistImpl<T> extends SQL<T> {
 				}
 			}
 			return result;
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
 
 	@Override
-	public List<String> getIDs(String column, Object value)throws PersistenceException, SQLException {
-		List<String>result=new ArrayList<>();
+	public List<String> getIDs(String column, Object value)throws PersistenceException {
+		List<String>result = new ArrayList<>();
 		try (Connection conn = getConnection()){
 			synchronized (conn) {
 				try(PreparedStatement ps = conn.prepareStatement(getSQLSelectKeys(column,value))){
@@ -100,11 +102,14 @@ public abstract class PersistImpl<T> extends SQL<T> {
 				}
 			}
 		}
+		catch(SQLException s) {
+			throw new PersistenceException(s);
+		}
 		return result;
 	}
 
 	@Override
-	public List<String> findIDs(boolean orMode, String column, String... values)throws PersistenceException, SQLException {
+	public List<String> findIDs(boolean orMode, String column, String... values)throws PersistenceException {
 		List<String>result=new ArrayList<>();
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
@@ -122,16 +127,18 @@ public abstract class PersistImpl<T> extends SQL<T> {
 				}
 			}
 			return result;
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
 
 	@Override
-	public List<String> findIDs(String column, String... values)throws PersistenceException, SQLException {
+	public List<String> findIDs(String column, String... values)throws PersistenceException {
 		return findIDs(false, column, values);
 	}
 
 	@Override
-	public int getRowCount(String column, Object value) throws SQLException {
+	public int getRowCount(String column, Object value) throws PersistenceException {
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
 				try (Statement s = conn.createStatement()){
@@ -141,11 +148,13 @@ public abstract class PersistImpl<T> extends SQL<T> {
 					return rs.getInt(1);
 				}
 			}
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
 
 	@Override
-	public int getRowCount()throws SQLException {
+	public int getRowCount()throws PersistenceException {
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
 				try (Statement s = conn.createStatement()){
@@ -155,47 +164,51 @@ public abstract class PersistImpl<T> extends SQL<T> {
 					return rs.getInt(1);
 				}
 			}
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
 
 	@Override
-	public Map<String,String> getColumnValues(String column)throws SQLException {
-		Map<String,String>result=new HashMap<>();
+	public Map<String,String> getColumnValues(String column)throws PersistenceException {
+		Map<String,String>result = new HashMap<>();
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
 				try(Statement s = conn.createStatement()){
-					String select=getSQLSelectColumn(column);
-					ResultSet rs=s.executeQuery(select);
+					String select = getSQLSelectColumn(column);
+					ResultSet rs = s.executeQuery(select);
 					while(rs.next()){
-						String key=rs.getString(1);
-						String value=rs.getString(2);
-						result.put(key, value);
+						result.put(rs.getString(1), rs.getString(2));
 					}
 				}
 			}
 			return result;
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
 
 	@Override
-	protected T _read(String id)throws PersistenceException, SQLException {
-		T result=null; 
+	protected T _read(String id)throws PersistenceException {
+		T result = null; 
 		try(Connection conn = getConnection()){
 			synchronized(conn){
-				try(PreparedStatement ps=conn.prepareStatement(getSQLRead())){
+				try(PreparedStatement ps = conn.prepareStatement(getSQLRead())){
 					ps.setString(1, id);
 					ResultSet rs = ps.executeQuery();
 					while(rs.next()){
-						result=marshaller.decode(rs.getString(1));
+						result = marshaller.decode(rs.getString(1));
 					}
 				}
 			}
 			return result;
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
 
 	@Override
-	protected void _write(T dao, String id)throws PersistenceException, SQLException {
+	protected void _write(T dao, String id)throws PersistenceException {
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
 				try(Statement s=conn.createStatement()){
@@ -216,36 +229,42 @@ public abstract class PersistImpl<T> extends SQL<T> {
 					}
 				}
 			}
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
 
 	@Override
-	protected void _remove(String id) throws PersistenceException, SQLException {
+	protected void _remove(String id) throws PersistenceException {
 		_executeUpdate(getSQLDelete(id));
 	}
 
 	@Override
-	protected void _removeAll()throws PersistenceException, SQLException {
+	protected void _removeAll()throws PersistenceException {
 		_executeUpdate(getSQLDeleteAll());
 	}
 
-	protected void _execute(String sql) throws SQLException {
+	protected void _execute(String sql) throws PersistenceException {
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
 				try(Statement s = conn.createStatement()){
 					s.execute(sql);
 				}
 			}
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
-	
-	protected void _executeUpdate(String sql) throws SQLException {
+
+	protected void _executeUpdate(String sql) throws PersistenceException {
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
 				try(Statement s = conn.createStatement()){
 					s.executeUpdate(sql);
 				}
 			}
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
 
@@ -263,9 +282,9 @@ public abstract class PersistImpl<T> extends SQL<T> {
 		return marshaller.deserialize(marshaller.serialize(obj));
 	}
 
-	protected void createTables()throws PersistenceException, SQLException {
-		List<String> cmds = getSQLCreateTable();
+	protected void createTables()throws PersistenceException {
 		try(Connection conn = getConnection()){
+			List<String> cmds = getSQLCreateTable();
 			synchronized (conn) {
 				try(Statement s = conn.createStatement()){
 					for(String sql: cmds){
@@ -277,52 +296,61 @@ public abstract class PersistImpl<T> extends SQL<T> {
 					}
 				}
 			}
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
 
-
-	public void dropTables()throws SQLException {
+	public void dropTables()throws PersistenceException {
 		try{
 			_execute( getSQLDropTable());
-		}catch(SQLException e){
+		}catch(PersistenceException e){
 			//OK, probably tables did not exist...
 		}
 	}
 
-	public void parametrizePSInsert(PreparedStatement psInsert, String id, T dao)throws SQLException, PersistenceException{
-		psInsert.setString(1, id);
-		String base64=marshaller.encode(dao);
-		psInsert.setString(2, base64);
-		psInsert.setString(3, getTimeStamp());
-		int i=4;
-		Object val = null;
-		for(ColumnDescriptor c: pd.getColumns()){
-			try {
-				val=c.getMethod().invoke(dao, (Object[])null);
-			}catch(Exception ex) {
-				throw new PersistenceException(ex);
+	public void parametrizePSInsert(PreparedStatement psInsert, String id, T dao)throws PersistenceException {
+		try {
+			psInsert.setString(1, id);
+			String base64=marshaller.encode(dao);
+			psInsert.setString(2, base64);
+			psInsert.setString(3, getTimeStamp());
+			int i=4;
+			Object val = null;
+			for(ColumnDescriptor c: pd.getColumns()){
+				try {
+					val=c.getMethod().invoke(dao, (Object[])null);
+				}catch(Exception ex) {
+					throw new PersistenceException(ex);
+				}
+				psInsert.setString(i, val!=null?val.toString():null);
+				i++;
 			}
-			psInsert.setString(i, val!=null?val.toString():null);
-			i++;
+		} catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
 
 	public void parametrizePSUpdate(PreparedStatement psUpdate, String id, T dao)
-			throws PersistenceException, SQLException {
-		String base64=marshaller.encode(dao);
-		psUpdate.setString(1, base64);
-		int i=2;
-		Object val=null;
-		for(ColumnDescriptor c: pd.getColumns()){
-			try {
-				val=c.getMethod().invoke(dao, (Object[])null);
-			}catch(Exception ex) {
-				throw new PersistenceException(ex);
+			throws PersistenceException {
+		try {
+			String base64 = marshaller.encode(dao);
+			psUpdate.setString(1, base64);
+			int i=2;
+			Object val=null;
+			for(ColumnDescriptor c: pd.getColumns()){
+				try {
+					val=c.getMethod().invoke(dao, (Object[])null);
+				}catch(Exception ex) {
+					throw new PersistenceException(ex);
+				}
+				psUpdate.setString(i, val!=null?val.toString():null);
+				i++;
 			}
-			psUpdate.setString(i, val!=null?val.toString():null);
-			i++;
+			psUpdate.setString(i, id);
+		} catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
-		psUpdate.setString(i, id);
 	}
 
 	protected int getDatabaseServerPort() {
@@ -347,7 +375,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 
 	protected abstract String getDefaultDriverName();
 
-	protected abstract ConnectionPoolDataSource getConnectionPoolDataSource() throws SQLException;
+	protected abstract ConnectionPoolDataSource getConnectionPoolDataSource() throws PersistenceException;
 
 	/**
 	 * get the database to connect to
@@ -395,36 +423,44 @@ public abstract class PersistImpl<T> extends SQL<T> {
 		return pool.getConnection();
 	}
 
-	protected void shutdownPool()throws SQLException{
-		pool.dispose();
+	protected void shutdownPool() throws PersistenceException {
+		try {
+			pool.dispose();
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
+		}
 	}
-	
+
 	public int getActiveConnections() {
 		return pool.getActiveConnections();
 	}
-	
+
 	@Override
 	public String getStatusMessage(){
 		return connectionURL+" <"+getActiveConnections()+"> connections.";
 	}
-	
-	protected boolean tableExists() throws PersistenceException, SQLException {
+
+	protected boolean tableExists() throws PersistenceException {
 		try(Connection conn = getConnection()){
 			synchronized(conn){
 				DatabaseMetaData md = conn.getMetaData();
 				ResultSet rs = md.getTables(null, null,  pd.getTableName().toUpperCase(), null);
 				return rs.next();
 			}
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
-	
-	protected boolean columnExists(String column) throws PersistenceException, SQLException {
+
+	protected boolean columnExists(String column) throws PersistenceException {
 		try(Connection conn = getConnection()){
 			synchronized(conn){
 				DatabaseMetaData md = conn.getMetaData();
 				ResultSet rs = md.getColumns(null, null, pd.getTableName().toUpperCase(), column.toUpperCase());
 				return rs.next();
 			}
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
 }

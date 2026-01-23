@@ -1,6 +1,5 @@
 package eu.unicore.persist.impl;
 
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -18,7 +17,7 @@ public abstract class SQL<T> extends Base<T>{
 		super(daoClass, tableName);
 	}
 
-	protected abstract List<String> getSQLCreateTable() throws PersistenceException, SQLException;
+	protected abstract List<String> getSQLCreateTable() throws PersistenceException;
 	
 	protected String getSQLStringType(){
 		return "VARCHAR";

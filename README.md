@@ -1,5 +1,7 @@
 # Persistence
 
+[![Build](https://github.com/UNICORE-EU/persistence/actions/workflows/maven.yml/badge.svg)](https://github.com/UNICORE-EU/persistence/actions/workflows/maven.yml)
+
 This repository contains the source code for the
 UNICORE persistence library, a simple utility for
 storing data objects in different database backends.

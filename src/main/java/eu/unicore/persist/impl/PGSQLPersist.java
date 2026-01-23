@@ -30,7 +30,7 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 	}
 
 	@Override
-	protected List<String> getSQLCreateTable() throws PersistenceException, SQLException {
+	protected List<String> getSQLCreateTable() throws PersistenceException {
 		List<String> cmds = new ArrayList<>();
 		String tb=pd.getTableName();
 		String type=getSQLStringType();
@@ -102,25 +102,27 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 	}
 
 	@Override
-	protected boolean columnExists(String column) throws PersistenceException, SQLException {
+	protected boolean columnExists(String column) throws PersistenceException {
 		return runCheck(String.format("SELECT 1 FROM pg_tables WHERE "
 				+ "schemaname='public' AND tablename='%s' AND column_name='%s'",
 				pd.getTableName(), column));
 	}
 
 	@Override
-	protected boolean tableExists() throws PersistenceException, SQLException {
+	protected boolean tableExists() throws PersistenceException {
 		return runCheck(String.format("SELECT 1 FROM pg_tables WHERE "
 				+ "schemaname='public' AND tablename='%s'", pd.getTableName()));
 	}
 
-	protected boolean runCheck(String sql) throws SQLException, PersistenceException {
+	protected boolean runCheck(String sql) throws PersistenceException {
 		try(Connection conn=getConnection()){
 			synchronized(conn){
 				try(Statement s=conn.createStatement()){
 					return s.executeQuery(sql).next();
 				}
 			}
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
 

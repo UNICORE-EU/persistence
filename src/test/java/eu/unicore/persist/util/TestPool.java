@@ -29,7 +29,6 @@ public class TestPool {
 	private static Object shutdownObj = new Object();
 	private static Random random = new Random();
 
-	
 
 	@Test
 	public void test() throws Exception {
@@ -55,12 +54,10 @@ public class TestPool {
 	};
 
 	private static ConnectionPoolDataSource createDataSource() throws Exception {
-
 		org.h2.jdbcx.JdbcDataSource dataSource = new org.h2.jdbcx.JdbcDataSource();
 		dataSource.setURL("jdbc:h2:file:./target/TestMiniConnectionPoolManagerDB;DB_CLOSE_DELAY=-1");
 		return dataSource;
 	}
-
 
 	private static void startWorkerThreads() {
 		threads = new WorkerThread[noOfThreads];

@@ -1,6 +1,5 @@
 package eu.unicore.persist.impl;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,23 +16,22 @@ import eu.unicore.persist.PersistenceException;
  */
 public class InMemory<T> extends Base<T>{
 
-	protected Map<String,T>map;
-	
+	protected final Map<String,T> map = new ConcurrentHashMap<>();
+
 	public InMemory(Class<T>daoClass, String tableName){
 		super(daoClass, tableName);
 	}
-	
+
 	@Override
-	public void init() throws PersistenceException, SQLException {
+	public void init() throws PersistenceException {
 		super.init();
-		map = new ConcurrentHashMap<>();
 	}
 
 	@Override
 	public String getDriverName() {
 		return ConcurrentHashMap.class.getName();
 	}
-	
+
 	@Override
 	public void shutdown() {}
 

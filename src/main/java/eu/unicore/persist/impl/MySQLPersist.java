@@ -31,7 +31,7 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 	}
 
 	@Override
-	protected List<String> getSQLCreateTable() throws PersistenceException, SQLException {
+	protected List<String> getSQLCreateTable() throws PersistenceException {
 		List<String> cmds = new ArrayList<>();
 		String tb = pd.getTableName();
 		String engineType = config.getSubkeyValue(PersistenceProperties.MYSQL_TABLETYPE, tb);
@@ -71,8 +71,8 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 	}
 
 	@Override
-	protected ConnectionPoolDataSource getConnectionPoolDataSource() throws SQLException {
-		MysqlConnectionPoolDataSource ds=new MysqlConnectionPoolDataSource();
+	protected ConnectionPoolDataSource getConnectionPoolDataSource() throws PersistenceException {
+		MysqlConnectionPoolDataSource ds = new MysqlConnectionPoolDataSource();
 		ds.setDatabaseName(getDatabaseName());
 		String sqlHost=config==null?"localhost":config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
 		ds.setPort(getDatabaseServerPort());
@@ -82,11 +82,15 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 		String tz = config==null?"UTC":config.getSubkeyValue(PersistenceProperties.MYSQL_TIMEZONE, pd.getTableName());
 		String sslModeS = config==null?"false":config.getSubkeyValue(PersistenceProperties.MYSQL_SSL, pd.getTableName());
 		boolean sslMode = Boolean.parseBoolean(sslModeS);
-		ds.setVerifyServerCertificate(false);
-		ds.setUseSSL(sslMode);
-		ds.setAutoReconnect(true);
-		ds.setAutoReconnectForPools(true);
-		ds.setServerTimezone(tz);
+		try {
+			ds.setVerifyServerCertificate(false);
+			ds.setUseSSL(sslMode);
+			ds.setAutoReconnect(true);
+			ds.setAutoReconnectForPools(true);
+			ds.setServerTimezone(tz);
+		} catch(SQLException s) {
+			throw new PersistenceException(s);
+		}
 		connectionURL = String.format("jdbc:mysql://%s:%s/%s?ssl=%s&serverTimezone=%s",
 				sqlHost, getDatabaseServerPort(), getDatabaseName(), sslMode, tz);
 		return ds;
@@ -109,7 +113,7 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 	}
 
 	@Override
-	protected boolean columnExists(String column) throws PersistenceException, SQLException {
+	protected boolean columnExists(String column) throws PersistenceException {
 		return runCheck( String.format("SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE "
 				+ "table_schema='%s' "
 				+ "AND table_name='%s' "
@@ -118,20 +122,22 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 	}
 
 	@Override
-	protected boolean tableExists() throws PersistenceException, SQLException {
+	protected boolean tableExists() throws PersistenceException {
 		return runCheck( String.format("SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE "
 				+ "table_schema='%s' "
 				+ "AND table_name='%s'",
 				getDatabaseName(), pd.getTableName()));
 	}
 
-	protected boolean runCheck(String sql) throws SQLException{
+	protected boolean runCheck(String sql) throws PersistenceException{
 		try(Connection conn = getConnection()){
 			synchronized(conn){
 				try(Statement s=conn.createStatement()){
 					return s.executeQuery(sql).next();
 				}
 			}
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
 

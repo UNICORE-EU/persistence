@@ -4,11 +4,11 @@
   <artifactId>persistence</artifactId>
   <name>Lightweight Object Persistence Layer</name>
   <inceptionYear>2008</inceptionYear>
-  <version>1.2.10-SNAPSHOT</version>
+  <version>1.3.0-SNAPSHOT</version>
   <parent>
     <groupId>eu.unicore</groupId>
     <artifactId>unicore-parent</artifactId>
-    <version>3.1.1</version>
+    <version>4.0.0</version>
   </parent>
 
   <properties>

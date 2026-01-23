@@ -1,6 +1,5 @@
 package eu.unicore.persist.impl;
 
-import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
@@ -28,7 +27,7 @@ public abstract class Base<T> implements Persist<T>{
 
 	private static final Logger logger = LogManager.getLogger("unicore.persistence.Base");
 
-	protected final Class<T>daoClass;
+	protected final Class<T> daoClass;
 
 	protected final PersistenceDescriptor pd;
 
@@ -54,11 +53,11 @@ public abstract class Base<T> implements Persist<T>{
 
 	@Override
 	public void setConfigSource(PersistenceProperties configSource){
-		this.config=configSource;
+		this.config = configSource;
 	}
 
 	@Override
-	public void init()throws PersistenceException, SQLException {
+	public void init()throws PersistenceException {
 		String table = pd.getTableName();
 		try {
 			// check that we can load the driver class
@@ -71,12 +70,12 @@ public abstract class Base<T> implements Persist<T>{
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	/**
 	 * return the name of the class required for the implementation
 	 */
 	protected abstract String getDriverName();
-	
+
 	protected void createMarshaller(){
 		marshaller = new JSONMarshaller<T>(daoClass);
 	}
@@ -104,8 +103,8 @@ public abstract class Base<T> implements Persist<T>{
 		boolean cacheEnabled=config==null?true:Boolean.parseBoolean(config.getSubkeyValue(PersistenceProperties.DB_CACHE_ENABLE, pd.getTableName()));
 		if( Boolean.TRUE.equals(caching) || (config!=null && cacheEnabled )){
 			caching=Boolean.TRUE;
-			String defaultCacheSize="10";
-			String cacheMaxSizeS=config!=null?config.getSubkeyValue(PersistenceProperties.DB_CACHE_MAX_SIZE,pd.getTableName()):defaultCacheSize;
+			String defaultCacheSize = "10";
+			String cacheMaxSizeS = config!=null?config.getSubkeyValue(PersistenceProperties.DB_CACHE_MAX_SIZE,pd.getTableName()):defaultCacheSize;
 			int cacheMaxSize = Integer.parseInt(cacheMaxSizeS);
 			cache = CacheBuilder.newBuilder()
 					.maximumSize(cacheMaxSize)
@@ -120,17 +119,17 @@ public abstract class Base<T> implements Persist<T>{
 	}
 
 	@Override
-	public T getForUpdate(String id)throws PersistenceException, SQLException, InterruptedException{
+	public T getForUpdate(String id)throws PersistenceException, InterruptedException{
 		try{
 			return getForUpdate(id,Long.MAX_VALUE,TimeUnit.MILLISECONDS);
-		}catch(TimeoutException cannotOccur){
-			throw new PersistenceException();
+		}catch(TimeoutException te){
+			throw new PersistenceException("",te);
 		}
 	}
 
 	@Override
 	public void lock(String id, long timeout, TimeUnit unit)throws TimeoutException, InterruptedException {
-		Lock lock=lockSupport.getOrCreateLock(id);
+		Lock lock = lockSupport.getOrCreateLock(id);
 		if(!lock.tryLock(timeout, unit)){
 			throw new TimeoutException("Time out reached: lock for table= "+pd.getTableName()
 										+" uid=<"+id+"> could not be acquired");
@@ -138,18 +137,18 @@ public abstract class Base<T> implements Persist<T>{
 	}
 
 	@Override
-	public T getForUpdate(String id, long timeout, TimeUnit unit)throws PersistenceException, SQLException, TimeoutException, InterruptedException{
-		Lock lock=lockSupport.getOrCreateLock(id);
-		T result=null;
+	public T getForUpdate(String id, long timeout, TimeUnit unit)throws PersistenceException, TimeoutException, InterruptedException{
+		Lock lock = lockSupport.getOrCreateLock(id);
+		T result = null;
 		if(lock.tryLock(timeout, unit)){
 			try{
-				result=read(id);
-				return result;
+				result = read(id);
 			}finally{
 				if(result==null){
 					lock.unlock();
 				}
 			}
+			return result;
 		}
 		else {
 			throw new TimeoutException("Time out reached: lock for table= "+pd.getTableName()
@@ -158,12 +157,12 @@ public abstract class Base<T> implements Persist<T>{
 	}
 
 	@Override
-	public T tryGetForUpdate(String id)throws PersistenceException, SQLException {
-		Lock lock=lockSupport.getOrCreateLock(id);
-		T result=null;
+	public T tryGetForUpdate(String id)throws PersistenceException {
+		Lock lock = lockSupport.getOrCreateLock(id);
+		T result = null;
 		if(lock.tryLock()){
 			try{
-				result=read(id);
+				result = read(id);
 			}
 			finally{
 				if(result==null){
@@ -182,10 +181,10 @@ public abstract class Base<T> implements Persist<T>{
 	 * @throws PersistenceException
 	 */
 	@Override
-	public T read(String id)throws PersistenceException, SQLException {
-		T result=null; 
+	public T read(String id)throws PersistenceException {
+		T result = null;
 		if(caching){
-			T element=cache.getIfPresent(id);
+			T element = cache.getIfPresent(id);
 			if(element!=null){
 				cacheHits++;
 				return copy(element);
@@ -199,17 +198,16 @@ public abstract class Base<T> implements Persist<T>{
 		}
 		return result;
 	}
-	
 
 	/**
 	 * read an instance from storage
 	 */
-	protected abstract T _read(String id) throws PersistenceException, SQLException;
+	protected abstract T _read(String id) throws PersistenceException;
 
 	@Override
-	public void write(T dao)throws PersistenceException, SQLException, IllegalStateException {
-		String id=pd.getID(dao);
-		Lock lock=lockSupport.getLockIfExists(id);
+	public void write(T dao)throws PersistenceException, IllegalStateException {
+		String id = pd.getID(dao);
+		Lock lock = lockSupport.getLockIfExists(id);
 		if(lock!=null && !lock.tryLock())throw new IllegalStateException("No write permission has been acquired!");
 		try{
 			logger.debug("[{}] Persisting <{}>", pd.getTableName(), id);
@@ -235,37 +233,36 @@ public abstract class Base<T> implements Persist<T>{
 	/**
 	 * write an instance to storage
 	 */
-	protected abstract void _write(T dao, String id)throws PersistenceException, SQLException;
+	protected abstract void _write(T dao, String id)throws PersistenceException;
 
 	@Override
 	public void unlock(T dao)throws PersistenceException{
-		String id=pd.getID(dao);
-		Lock lock=lockSupport.getLockIfExists(id);
+		String id = pd.getID(dao);
+		Lock lock = lockSupport.getLockIfExists(id);
 		if(lock!=null)lock.unlock();
 	}
 
 	@Override
-	public void remove(String id)throws PersistenceException, SQLException {
+	public void remove(String id)throws PersistenceException {
 		try{
 			delete(id);
 		}finally{
 			lockSupport.cleanup(id);
 		}
 	}
-	
+
 	@Override
-	public void delete(String id)throws PersistenceException, SQLException{
+	public void delete(String id)throws PersistenceException {
 		if(caching){
 			cache.invalidate(id);
 		}
 		_remove(id);
 	}
 
-	
-	protected abstract void _remove(String id) throws PersistenceException, SQLException;
-	
+	protected abstract void _remove(String id) throws PersistenceException;
+
 	@Override
-	public void removeAll()throws PersistenceException, SQLException{
+	public void removeAll()throws PersistenceException{
 		if(caching){
 			cache.invalidateAll();
 		}
@@ -276,7 +273,7 @@ public abstract class Base<T> implements Persist<T>{
 		}
 	}
 
-	protected abstract void _removeAll() throws PersistenceException, SQLException;
+	protected abstract void _removeAll() throws PersistenceException;
 
 	public Class<T> getDaoClass(){
 		return daoClass;
@@ -290,8 +287,8 @@ public abstract class Base<T> implements Persist<T>{
 	}
 
 	@Override
-	public void setCaching(boolean value){
-		caching=value;
+	public void setCaching(boolean caching){
+		this.caching = caching;
 	}
 
 	public long getCacheHits() {

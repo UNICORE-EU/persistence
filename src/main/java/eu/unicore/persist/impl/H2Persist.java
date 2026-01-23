@@ -63,7 +63,7 @@ public class H2Persist<T> extends PersistImpl<T>{
 	}
 
 	@Override
-	public void init()throws PersistenceException, SQLException {
+	public void init()throws PersistenceException {
 		super.init();
 		if(config==null)return;
 		resetCache();
@@ -71,12 +71,12 @@ public class H2Persist<T> extends PersistImpl<T>{
 	}
 
 	@Override
-	public void shutdown() throws PersistenceException, SQLException {
+	public void shutdown() throws PersistenceException {
 		instances.remove(this);
 		super.shutdown();
 	}
 	
-	protected void resetCache() throws PersistenceException, SQLException {
+	protected void resetCache() throws PersistenceException {
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
 				try(Statement s = conn.createStatement()){
@@ -85,11 +85,13 @@ public class H2Persist<T> extends PersistImpl<T>{
 					logger.debug("Set H2 cache size to {} kb.", cacheSize);
 				}
 			}
+		}catch(SQLException s) {
+			throw new PersistenceException(s);
 		}
 	}
 	
 	@Override
-	protected List<String> getSQLCreateTable() throws PersistenceException, SQLException {
+	protected List<String> getSQLCreateTable() throws PersistenceException {
 		List<String>cmds = new ArrayList<>();
 		String stringType = getSQLStringType();
 		cmds.add(String.format("CREATE TABLE IF NOT EXISTS %s (id %s PRIMARY KEY, data %s)",
