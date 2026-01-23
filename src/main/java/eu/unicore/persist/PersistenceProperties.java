@@ -162,7 +162,7 @@ public class PersistenceProperties extends PropertiesHelper{
 				setDescription("(deprecated, no effect)"));
 		META.put(DB_CLUSTER_CONFIG, new PropertyMD().setCanHaveSubkeys().
 				setDescription("Clustering configuration file."));
-		META.put(DB_POOL_MAXSIZE, new PropertyMD("2").setCanHaveSubkeys().
+		META.put(DB_POOL_MAXSIZE, new PropertyMD("1").setCanHaveSubkeys().
 				setDescription("Connection pool maximum size."));
 		META.put(DB_POOL_TIMEOUT, new PropertyMD("3600").setCanHaveSubkeys().
 				setDescription("Connection pool timeout when trying to get a connection."));

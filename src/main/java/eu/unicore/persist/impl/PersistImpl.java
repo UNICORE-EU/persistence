@@ -45,7 +45,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	public void init()throws PersistenceException {
 		super.init();
 		String table = pd.getTableName();
-		int maxConn = config==null? 2 :
+		int maxConn = config==null? 1 :
 			Integer.parseInt(config.getSubkeyValue(PersistenceProperties.DB_POOL_MAXSIZE,table));
 		int timeout=config==null ? Integer.MAX_VALUE:
 			Integer.parseInt(config.getSubkeyValue(PersistenceProperties.DB_POOL_TIMEOUT, table));
@@ -72,8 +72,8 @@ public abstract class PersistImpl<T> extends SQL<T> {
 
 	@Override
 	public List<String> getIDs(boolean oldestFirst)throws PersistenceException {
-		List<String>result=new ArrayList<>();
 		try(Connection conn = getConnection()){
+			List<String>result = new ArrayList<>();
 			synchronized (conn) {
 				try (Statement s = conn.createStatement()){
 					ResultSet rs = s.executeQuery(getSQLSelectAllKeys(oldestFirst));
@@ -90,8 +90,8 @@ public abstract class PersistImpl<T> extends SQL<T> {
 
 	@Override
 	public List<String> getIDs(String column, Object value)throws PersistenceException {
-		List<String>result = new ArrayList<>();
 		try (Connection conn = getConnection()){
+			List<String>result = new ArrayList<>();
 			synchronized (conn) {
 				try(PreparedStatement ps = conn.prepareStatement(getSQLSelectKeys(column,value))){
 					ps.setString(1, String.valueOf(value));
@@ -101,17 +101,17 @@ public abstract class PersistImpl<T> extends SQL<T> {
 					}
 				}
 			}
+			return result;
 		}
 		catch(SQLException s) {
 			throw new PersistenceException(s);
 		}
-		return result;
 	}
 
 	@Override
 	public List<String> findIDs(boolean orMode, String column, String... values)throws PersistenceException {
-		List<String>result=new ArrayList<>();
 		try(Connection conn = getConnection()){
+			List<String>result = new ArrayList<>();
 			synchronized (conn) {
 				String sql = getSQLFuzzySelect(column, values.length, orMode);
 				try(PreparedStatement ps = conn.prepareStatement(sql)){
@@ -120,7 +120,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 						ps.setString(i, "%"+val+"%");
 						i++;
 					}
-					ResultSet rs=ps.executeQuery();
+					ResultSet rs = ps.executeQuery();
 					while(rs.next()){
 						result.add(rs.getString(1));
 					}
@@ -142,8 +142,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
 				try (Statement s = conn.createStatement()){
-					String sql=getSQLRowCount(column,value);
-					ResultSet rs=s.executeQuery(sql);
+					ResultSet rs = s.executeQuery(getSQLRowCount(column, value));
 					rs.next();
 					return rs.getInt(1);
 				}
@@ -158,8 +157,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
 				try (Statement s = conn.createStatement()){
-					String sql=getSQLRowCount();
-					ResultSet rs=s.executeQuery(sql);
+					ResultSet rs = s.executeQuery(getSQLRowCount());
 					rs.next();
 					return rs.getInt(1);
 				}
@@ -175,8 +173,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
 				try(Statement s = conn.createStatement()){
-					String select = getSQLSelectColumn(column);
-					ResultSet rs = s.executeQuery(select);
+					ResultSet rs = s.executeQuery(getSQLSelectColumn(column));
 					while(rs.next()){
 						result.put(rs.getString(1), rs.getString(2));
 					}
@@ -211,18 +208,17 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	protected void _write(T dao, String id)throws PersistenceException {
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
-				try(Statement s=conn.createStatement()){
-					String exists=getSQLExists(id);
-					if(s.executeQuery(exists).next()){
-						//update
-						try(PreparedStatement ps=conn.prepareStatement(getSQLUpdate())){
+				try(Statement s = conn.createStatement()){
+					if(s.executeQuery(getSQLExists(id)).next()){
+						// update
+						try(PreparedStatement ps = conn.prepareStatement(getSQLUpdate())){
 							parametrizePSUpdate(ps,id, dao);
 							ps.executeUpdate();
 						}
 					}
 					else{
-						//insert
-						try(PreparedStatement ps=conn.prepareStatement(getSQLInsert())){
+						// insert
+						try(PreparedStatement ps = conn.prepareStatement(getSQLInsert())){
 							parametrizePSInsert(ps, id, dao);
 							ps.executeUpdate();
 						}
@@ -283,8 +279,8 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	}
 
 	protected void createTables()throws PersistenceException {
+		List<String> cmds = getSQLCreateTable();
 		try(Connection conn = getConnection()){
-			List<String> cmds = getSQLCreateTable();
 			synchronized (conn) {
 				try(Statement s = conn.createStatement()){
 					for(String sql: cmds){
@@ -303,7 +299,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 
 	public void dropTables()throws PersistenceException {
 		try{
-			_execute( getSQLDropTable());
+			_execute(getSQLDropTable());
 		}catch(PersistenceException e){
 			//OK, probably tables did not exist...
 		}
@@ -312,10 +308,9 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	public void parametrizePSInsert(PreparedStatement psInsert, String id, T dao)throws PersistenceException {
 		try {
 			psInsert.setString(1, id);
-			String base64=marshaller.encode(dao);
-			psInsert.setString(2, base64);
+			psInsert.setString(2, marshaller.encode(dao));
 			psInsert.setString(3, getTimeStamp());
-			int i=4;
+			int i = 4;
 			Object val = null;
 			for(ColumnDescriptor c: pd.getColumns()){
 				try {
@@ -334,8 +329,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	public void parametrizePSUpdate(PreparedStatement psUpdate, String id, T dao)
 			throws PersistenceException {
 		try {
-			String base64 = marshaller.encode(dao);
-			psUpdate.setString(1, base64);
+			psUpdate.setString(1, marshaller.encode(dao));
 			int i=2;
 			Object val=null;
 			for(ColumnDescriptor c: pd.getColumns()){
