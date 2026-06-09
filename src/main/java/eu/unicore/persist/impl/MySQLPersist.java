@@ -98,16 +98,16 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 
 	@Override
 	protected Connection getConnection() throws SQLException {
-		Connection c=null;
+		Connection c = null;
 		try{
-			c=super.getConnection();	
+			c = super.getConnection();	
 			((com.mysql.cj.jdbc.JdbcConnection)c).ping();
 		}catch(Exception se){
 			logger.warn("Error when getting a MySQL connection: {}, trying to reconnect.", se.getMessage());
 			try{
 				pool.cleanupPooledConnections();
 			}catch(Exception ex){/*ignored*/}
-			c=super.getConnection();
+			c = super.getConnection();
 		}
 		return c;
 	}
@@ -132,7 +132,7 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 	protected boolean runCheck(String sql) throws PersistenceException{
 		try(Connection conn = getConnection()){
 			synchronized(conn){
-				try(Statement s=conn.createStatement()){
+				try(Statement s = conn.createStatement()){
 					return s.executeQuery(sql).next();
 				}
 			}

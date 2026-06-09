@@ -42,7 +42,7 @@ public class Export {
 	public Export(Properties inputConfig, String outputFile)throws Exception{
 		daoClass = Class.forName((String)inputConfig.remove("class"));
 		Class inPersistImpl = Class.forName(inputConfig.getProperty("persistence.class"));
-		String inTableName=(String)inputConfig.remove("tableName");
+		String inTableName = (String)inputConfig.remove("tableName");
 		input = PersistenceFactory.get(new PersistenceProperties(inputConfig)).configurePersist(daoClass, inPersistImpl, inTableName);
 		completeSetup(outputFile);
 	}
@@ -58,7 +58,7 @@ public class Export {
 	public void doExport()throws Exception{
     	JsonWriter writer = new JsonWriter(output);
 		int errors=0;
-		Collection<String>ids=input.getIDs();
+		Collection<String>ids = input.getIDs();
 		writer.beginArray();
 		int n = 0;
 		for(String s: ids){
@@ -96,10 +96,10 @@ public class Export {
 			System.err.println("Require args: inputConfig outputFilename");
 			System.exit(1);
 		}
-		Properties inputConfig=new Properties();
+		Properties inputConfig = new Properties();
 		inputConfig.load(new FileInputStream(args[0]));
 		inputConfig.putAll(System.getProperties());
-		Export export=new Export(inputConfig, args[1]);
+		Export export = new Export(inputConfig, args[1]);
 		export.doExport();
 		export.shutdown();
 	}

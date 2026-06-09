@@ -32,8 +32,8 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 	@Override
 	protected List<String> getSQLCreateTable() throws PersistenceException {
 		List<String> cmds = new ArrayList<>();
-		String tb=pd.getTableName();
-		String type=getSQLStringType();
+		String tb = pd.getTableName();
+		String type = getSQLStringType();
 		cmds.add(String.format("CREATE TABLE IF NOT EXISTS %s (id VARCHAR(255) PRIMARY KEY, data %s)", tb, type));
 		boolean haveTable = tableExists();
 		if(pd.getColumns().size()>0){
@@ -70,13 +70,15 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 	protected ConnectionPoolDataSource getConnectionPoolDataSource(){
 		PGConnectionPoolDataSource ds = new PGConnectionPoolDataSource();
 		ds.setDatabaseName(getDatabaseName());
-		String sqlHost=config==null?"localhost":config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
+		String sqlHost = config==null ?
+				"localhost" : config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
 		int port = getDatabaseServerPort();
 		ds.setPortNumbers(new int[] { port });
 		ds.setServerNames(new String[] { sqlHost });
 		ds.setUser(getUserName());
 		ds.setPassword(getPassword());
-		String sslModeS = config==null?"true":config.getSubkeyValue(PersistenceProperties.PGSQL_SSL, pd.getTableName());
+		String sslModeS = config==null ?
+				"true" : config.getSubkeyValue(PersistenceProperties.PGSQL_SSL, pd.getTableName());
 		boolean sslMode = Boolean.parseBoolean(sslModeS);
 		ds.setSsl(sslMode);
 		if(sslMode) {
@@ -88,15 +90,15 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 
 	@Override
 	protected Connection getConnection() throws SQLException{
-		Connection c=null;
+		Connection c = null;
 		try{
-			c=super.getConnection();
+			c = super.getConnection();
 		}catch(Exception se){
-			logger.warn("Error when getting a PGSQL connection: {}, trying to reconnect.",se.getMessage());
+			logger.warn("Error when getting a PGSQL connection: {}, trying to reconnect.", se.getMessage());
 			try{
 				pool.cleanupPooledConnections();
 			}catch(Exception ex){/*ignored*/}
-			c=super.getConnection();
+			c = super.getConnection();
 		}
 		return c;
 	}
@@ -115,9 +117,9 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 	}
 
 	protected boolean runCheck(String sql) throws PersistenceException {
-		try(Connection conn=getConnection()){
+		try(Connection conn = getConnection()){
 			synchronized(conn){
-				try(Statement s=conn.createStatement()){
+				try(Statement s = conn.createStatement()){
 					return s.executeQuery(sql).next();
 				}
 			}

@@ -67,7 +67,7 @@ public abstract class Base<T> implements Persist<T>{
 			createMarshaller();
 		} catch (Exception e) {
 			logger.error("Error setting up persistence implementation for table <"+table+">",e);
-			throw new RuntimeException(e);
+			throw new PersistenceException(e);
 		}
 	}
 
@@ -100,9 +100,10 @@ public abstract class Base<T> implements Persist<T>{
 	 * cache is initialised if the per-table property  {@link PersistenceProperties#DB_CACHE_ENABLE} is set to "true"
 	 */
 	protected synchronized void initCache(){
-		boolean cacheEnabled=config==null?true:Boolean.parseBoolean(config.getSubkeyValue(PersistenceProperties.DB_CACHE_ENABLE, pd.getTableName()));
+		boolean cacheEnabled = config==null ?
+				true : Boolean.parseBoolean(config.getSubkeyValue(PersistenceProperties.DB_CACHE_ENABLE, pd.getTableName()));
 		if( Boolean.TRUE.equals(caching) || (config!=null && cacheEnabled )){
-			caching=Boolean.TRUE;
+			caching = Boolean.TRUE;
 			String defaultCacheSize = "10";
 			String cacheMaxSizeS = config!=null?config.getSubkeyValue(PersistenceProperties.DB_CACHE_MAX_SIZE,pd.getTableName()):defaultCacheSize;
 			int cacheMaxSize = Integer.parseInt(cacheMaxSizeS);
@@ -114,7 +115,7 @@ public abstract class Base<T> implements Persist<T>{
 					.build();
 		}
 		else{
-			caching=Boolean.FALSE;
+			caching = Boolean.FALSE;
 		}
 	}
 

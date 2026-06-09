@@ -23,5 +23,5 @@ import com.google.gson.GsonBuilder;
 public @interface JSON {
 
 	Class<? extends GSONConverter>[] customHandlers() default {};
-	
+
 }

@@ -28,17 +28,17 @@ public class H2Persist<T> extends PersistImpl<T>{
 
 	private static final Logger logger = LogManager.getLogger("unicore.persistence.H2Persist");
 
-	protected Boolean serverMode=null;
+	protected Boolean serverMode = null;
 
 	String connectionURL;
 
 	// setup periodic cache cleanup due to h2 issue with increasing cache memory use
 	private static final Set<H2Persist<?>> instances = new HashSet<>();
-	
+
 	private static final Thread cleanupThread;
-	
+
 	private static long cacheCleanupPeriod = 10; // minutes
-	
+
 	static{
 		cleanupThread = new Thread(()->
 			{
@@ -57,7 +57,7 @@ public class H2Persist<T> extends PersistImpl<T>{
 		cleanupThread.setDaemon(true);
 		cleanupThread.start();
 	}
-	
+
 	public H2Persist(Class<T> daoClass, String tableName) {
 		super(daoClass, tableName);
 	}
@@ -75,7 +75,7 @@ public class H2Persist<T> extends PersistImpl<T>{
 		instances.remove(this);
 		super.shutdown();
 	}
-	
+
 	protected void resetCache() throws PersistenceException {
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
@@ -89,7 +89,7 @@ public class H2Persist<T> extends PersistImpl<T>{
 			throw new PersistenceException(s);
 		}
 	}
-	
+
 	@Override
 	protected List<String> getSQLCreateTable() throws PersistenceException {
 		List<String>cmds = new ArrayList<>();
@@ -134,29 +134,33 @@ public class H2Persist<T> extends PersistImpl<T>{
 		if(connectionURL!=null){
 			return connectionURL;
 		}
-		String tableName=pd.getTableName();
-		String dir=null;
+		String tableName  =pd.getTableName();
+		String dir = null;
 		if(serverMode==null){
-			serverMode=config==null?false:Boolean.parseBoolean(config.getSubkeyValue(PersistenceProperties.H2_SERVER_MODE, tableName));
+			serverMode = config==null ?
+					false : Boolean.parseBoolean(config.getSubkeyValue(PersistenceProperties.H2_SERVER_MODE, tableName));
 		}
 		if(config!=null){
-			dir=config.getSubkeyValue(PersistenceProperties.DB_DIRECTORY,tableName);
+			dir = config.getSubkeyValue(PersistenceProperties.DB_DIRECTORY,tableName);
 		}
 		if(!(new File(dir).isAbsolute())){
-			dir="./"+dir;
+			dir = "./"+dir;
 		}
-		String params="DB_CLOSE_ON_EXIT=FALSE";
-		String additionalParams=config==null?null:config.getSubkeyValue(PersistenceProperties.H2_OPTIONS, tableName);
+		String params = "DB_CLOSE_ON_EXIT=FALSE";
+		String additionalParams = config==null ?
+				null : config.getSubkeyValue(PersistenceProperties.H2_OPTIONS, tableName);
 		if(additionalParams!=null){
-			params+=";"+additionalParams;
+			params += ";" + additionalParams;
 		}
-		String id=getDatabaseName();
+		String id = getDatabaseName();
 		if(serverMode){
-			String host=config==null?"localhost":config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
-			String port=config==null?"3306":config.getSubkeyValue(PersistenceProperties.DB_PORT, pd.getTableName());
-			connectionURL="jdbc:h2:tcp://"+host+":"+port+"/"+dir+File.separator+id+";AUTO_RECONNECT=TRUE;"+params;
+			String host = config==null ?
+					"localhost" : config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
+			String port = config==null ?
+					"3306" : config.getSubkeyValue(PersistenceProperties.DB_PORT, pd.getTableName());
+			connectionURL = "jdbc:h2:tcp://"+host+":"+port+"/"+dir+File.separator+id+";AUTO_RECONNECT=TRUE;"+params;
 		}else{
-			connectionURL= "jdbc:h2:file:"+dir+File.separator+id+";"+params;
+			connectionURL = "jdbc:h2:file:"+dir+File.separator+id+";"+params;
 		}
 		return connectionURL;
 	}
@@ -173,7 +177,7 @@ public class H2Persist<T> extends PersistImpl<T>{
 
 	@Override
 	protected ConnectionPoolDataSource getConnectionPoolDataSource(){
-		JdbcDataSource ds=new JdbcDataSource();
+		JdbcDataSource ds = new JdbcDataSource();
 		ds.setURL(createConnString());
 		ds.setUser(getUserName());
 		ds.setPassword(getPassword());

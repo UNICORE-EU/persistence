@@ -20,7 +20,7 @@ public class LockSupport {
 	private final String tableName;
 
 	public LockSupport(String tableName) throws ConfigurationException {
-		this.tableName=tableName;
+		this.tableName = tableName;
 	}
 
 	public final synchronized Lock getOrCreateLock(String id){
@@ -44,13 +44,13 @@ public class LockSupport {
 	 * @return <code>true</code> if a lock existed and was cleaned up
 	 */
 	public synchronized boolean cleanup(String id){
-		Lock l=getLockIfExists(id);
+		Lock l = getLockIfExists(id);
 		if(l!=null){
 			try{
 				l.unlock();
 			}catch(Exception me){}
 		}
-		String key=tableName+id;
+		String key = tableName+id;
 		return locks.remove(key)!=null;
 	}
 

@@ -20,12 +20,13 @@ public class JSONMarshaller<T> implements ObjectMarshaller<T> {
 		this.classOfT = classOfT;
 		this.gson=build();
 	}
-	
+
 	private Gson build(){
 		GsonBuilder builder = new GsonBuilder();
 		GSONUtil.registerTypeConverters(classOfT, builder);
 		return builder.create();
 	}
+
 	@Override
 	public T deserialize(InputStream is) {
 		return gson.fromJson(new InputStreamReader(is), classOfT);

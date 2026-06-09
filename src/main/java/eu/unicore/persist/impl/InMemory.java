@@ -52,30 +52,29 @@ public class InMemory<T> extends Base<T>{
 		}
 		return res;
 	}
-	
+
 	@Override
 	public List<String> findIDs(boolean orMode, String column, String... values) throws PersistenceException {
-		List<String> res=new ArrayList<>();
+		List<String> res = new ArrayList<>();
 		for(String s: map.keySet()){
-			T val=map.get(s);
-			String cmp=pd.getColumnValue(column, val);
+			T val = map.get(s);
+			String cmp = pd.getColumnValue(column, val);
 			if(compareWeak(orMode, values,cmp))res.add(s);
 		}
 		return res;
 	}
-	
+
 	@Override
 	public List<String> findIDs(String column, String... values) throws PersistenceException {
 		return findIDs(false, column, values);
 	}
-	
+
 	@Override
 	public Map<String,String> getColumnValues(String column) throws PersistenceException {
 		Map<String,String> res = new HashMap<>();
 		for(String id: map.keySet()){
-			T val=map.get(id);
-			String value=pd.getColumnValue(column, val);
-			res.put(id,value);
+			T val = map.get(id);
+			res.put(id, pd.getColumnValue(column, val));
 		}
 		return res;
 	}
@@ -95,7 +94,7 @@ public class InMemory<T> extends Base<T>{
 		if(value==null)return cmp==null;
 		return value.equals(cmp);
 	}
-	
+
 	private boolean compareWeak(boolean orMode, String[] values, String cmp){
 		if(values==null||values.length==0)return cmp==null;
 		for(String value: values){
@@ -108,7 +107,7 @@ public class InMemory<T> extends Base<T>{
 		}
 		return !orMode;
 	}
-	
+
 	@Override
 	protected T _read(String id) throws PersistenceException {
 		return map.get(id);
@@ -118,7 +117,7 @@ public class InMemory<T> extends Base<T>{
 	protected void _remove(String id) throws PersistenceException {
 		map.remove(id);
 	}
-	
+
 	@Override
 	protected void _removeAll() throws PersistenceException {
 		map.clear();

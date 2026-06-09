@@ -12,14 +12,12 @@ import eu.unicore.persist.annotations.Table;
 
 /**
  * Helper for evaluating annotations on a persistent class
- * 
  * @see PersistenceDescriptor
+ *
  * @author schuller
  */
 public class ClassScanner {
 
-	private ClassScanner(){}
-	
 	/**
 	 * figure out the table name to use. If no {@link Table} annotation is
 	 * present, the class name is used as default
@@ -33,7 +31,7 @@ public class ClassScanner {
 		}
 		return daoClass.getSimpleName();
 	}
-	
+
 	/**
 	 * retrieve the {@link Method} to use for getting the unique ID
 	 * of an entity. This is selected by an {@link ID} annotation,
@@ -53,12 +51,9 @@ public class ClassScanner {
 				return m;
 			}
 		}
-		//else check if a field has the required annotation
 		for(Field f: daoClass.getDeclaredFields()){
 			if(f.getAnnotation(ID.class)!=null){
-				//find getter
-				String name="get"+f.getName();
-				Method m=findMethod(daoClass, name);
+				Method m = findMethod(daoClass, "get"+f.getName());
 				if(m!=null){
 					if(!String.class.equals(m.getReturnType())){
 						throw new IllegalArgumentException("ID method must return java.lang.String");
@@ -69,32 +64,31 @@ public class ClassScanner {
 		}
 		throw new IllegalArgumentException("Class has no useable ID annotation!");
 	}
-	
+
 	public static List<ColumnDescriptor> getColumns(Class<?>daoClass){
-		List<ColumnDescriptor>result=new ArrayList<ColumnDescriptor>();
+		List<ColumnDescriptor>result = new ArrayList<>();
 		for(Method m: daoClass.getDeclaredMethods()){
 			if(m.getAnnotation(Column.class)!=null){
-				String name=((Column)m.getAnnotation(Column.class)).name();
-				ColumnDescriptor cd=new ColumnDescriptor(m,name);
-				result.add(cd);
+				String name = ((Column)m.getAnnotation(Column.class)).name();
+				result.add(new ColumnDescriptor(m,name));
 			}
 		}
-		//else check if a field has the required annotation
 		for(Field f: daoClass.getDeclaredFields()){
 			if(f.getAnnotation(Column.class)!=null){
-				//find getter
-				String name="get"+f.getName();
-				Method m=findMethod(daoClass, name);
-				if(m==null)throw new IllegalArgumentException("Can't find getter method for column "+f.getName());
-				String columnName=((Column)f.getAnnotation(Column.class)).name();
-				if(columnName==null)columnName=f.getName();
-				ColumnDescriptor cd=new ColumnDescriptor(m,columnName);
-				result.add(cd);
+				Method m = findMethod(daoClass, "get"+f.getName());
+				if(m==null) {
+					throw new IllegalArgumentException("Can't find getter method for column "+f.getName());
+				}
+				String columnName = ((Column)f.getAnnotation(Column.class)).name();
+				if(columnName==null) {
+					columnName = f.getName();
+				}
+				result.add(new ColumnDescriptor(m,columnName));
 			}
 		}
 		return result;
 	}
-	
+
 	private static Method findMethod(Class<?>daoClass, String name){
 		for(Method m: daoClass.getDeclaredMethods()){
 			if(m.getName().equalsIgnoreCase(name)){
@@ -103,5 +97,5 @@ public class ClassScanner {
 		}
 		return null;
 	}
-	
+
 }

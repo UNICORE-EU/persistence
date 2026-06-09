@@ -25,7 +25,7 @@ public class PersistenceDescriptor {
 	private Map<String,ColumnDescriptor>columnMap;
 
 	public static PersistenceDescriptor get(Class<?>daoClass){
-		PersistenceDescriptor pd=new PersistenceDescriptor();
+		PersistenceDescriptor pd = new PersistenceDescriptor();
 		pd.setTableName(ClassScanner.getTableName(daoClass));
 		pd.getIdMethod=ClassScanner.getGetIdMethod(daoClass);
 		pd.setColumns(ClassScanner.getColumns(daoClass));
@@ -43,7 +43,7 @@ public class PersistenceDescriptor {
 	public void setTableName(String tableName) {
 		this.tableName = tableName;
 	}
-	
+
 	/**
 	 * get the unique ID for the given object
 	 * 
@@ -66,7 +66,7 @@ public class PersistenceDescriptor {
 	public void setColumns(List<ColumnDescriptor> columns) {
 		this.columns = columns;
 	}
-	
+
 	/**
 	 * helper to get the value of a column for an object
 	 * @param columnName - the column name

@@ -24,7 +24,7 @@ import eu.unicore.persist.util.Pool;
 /**
  * JDBC based persistence implementation, also dealing with JDBC connection pooling
  * 
- * @param <T> -  the Java entity type
+ * @param <T> - the Java entity type
  * 
  * @author schuller
  */
@@ -32,7 +32,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 
 	private static final Logger logger = LogManager.getLogger("unicore.persistence.PersistImpl");
 
-	protected String databaseName=null;
+	protected String databaseName = null;
 
 	// for logging purposes
 	protected String connectionURL = "";
@@ -56,7 +56,10 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	@Override
 	public void shutdown()throws PersistenceException {
 		try {
-			_execute(getSQLShutdown());
+			String shutDown = getSQLShutdown();
+			if(shutDown!=null && shutDown.length()>0) {
+				_execute(getSQLShutdown());
+			}
 		}
 		catch(Exception e){
 			logger.warn("Shutting down: "+e.getMessage());

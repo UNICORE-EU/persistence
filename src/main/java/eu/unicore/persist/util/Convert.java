@@ -36,14 +36,14 @@ public class Convert {
 
     @SuppressWarnings("unchecked")
 	public void convert()throws Exception{
-		int errors=0;
-		Collection<String>ids=input.getIDs();
+		int errors = 0;
+		Collection<String>ids = input.getIDs();
 		System.out.print("Will convert "+ids.size()+ " entries.");
 		//convert
 		for(Object s: ids){
 			System.out.print("Converting "+s+ " ...");
 			try{
-				Object in=input.getForUpdate((String)s);
+				Object in = input.getForUpdate((String)s);
 				output.write(in);
 				System.out.println("... OK");
 			}catch(Exception ex){
@@ -74,18 +74,15 @@ public class Convert {
 	 */
 	public static void main(String[] args)throws Exception {
 		System.out.println("*** Convert utility *** ");
-		//setup input database
-		Properties inputConfig=new Properties();
+
+		Properties inputConfig = new Properties();
 		inputConfig.load(new FileInputStream(args[0]));
-		
-		//setup output database
-		Properties outputConfig=new Properties();
+
+		Properties outputConfig = new Properties();
 		outputConfig.load(new FileInputStream(args[1]));
-		
-		Convert converter=new Convert(inputConfig, outputConfig);
+
+		Convert converter = new Convert(inputConfig, outputConfig);
 		converter.convert();
 		converter.shutDown();
-		
 	}
-	
 }

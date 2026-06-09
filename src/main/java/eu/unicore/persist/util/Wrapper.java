@@ -59,7 +59,7 @@ public class Wrapper<T extends Serializable> {
 		public Wrapper deserialize(JsonElement json, Type typeOfT,
 				JsonDeserializationContext context)
 						throws JsonParseException {
-			JsonElement jsonClassname=json.getAsJsonObject().get("className");
+			JsonElement jsonClassname = json.getAsJsonObject().get("className");
 			Serializable target = null;
 			if(jsonClassname!=null){
 				String className = json.getAsJsonObject().get("className").getAsString();

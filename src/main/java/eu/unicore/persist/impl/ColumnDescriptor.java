@@ -11,13 +11,13 @@ import java.lang.reflect.Method;
  */
 public class ColumnDescriptor {
 
-	private Method method;
-	
-	private String column;
-	
+	private final Method method;
+
+	private final String column;
+
 	public ColumnDescriptor(Method method, String column){
-		this.method=method;
-		this.column=column;
+		this.method = method;
+		this.column = column;
 	}
 
 	public Method getMethod() {
@@ -27,5 +27,5 @@ public class ColumnDescriptor {
 	public String getColumn() {
 		return column;
 	}
-	
+
 }

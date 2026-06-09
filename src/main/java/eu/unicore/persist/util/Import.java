@@ -37,23 +37,23 @@ public class Import {
 	public Import(String json, Properties outputConfig)throws Exception{
 		this(new StringReader(json), outputConfig);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private Import(Reader reader, Properties outputConfig) throws Exception {
 		this.input = reader;
 		daoClass = Class.forName((String)outputConfig.remove("class"));
 		Class inPersistImpl = Class.forName(outputConfig.getProperty("persistence.class"));
-		String inTableName=(String)outputConfig.remove("tableName");
+		String inTableName = (String)outputConfig.remove("tableName");
 		output=PersistenceFactory.get(new PersistenceProperties(outputConfig)).configurePersist(daoClass, inPersistImpl, inTableName);
 		GsonBuilder builder = new GsonBuilder();
 		GSONUtil.registerTypeConverters(daoClass, builder);
-		gson=builder.create();
+		gson = builder.create();
 	}
 
 	@SuppressWarnings("unchecked")
 	public void doImport()throws Exception{
-		int errors=0;
-		int count=0;
+		int errors = 0;
+		int count = 0;
 		JsonReader reader = new JsonReader(input);
 		reader.beginArray();
 		while(reader.hasNext()){
@@ -91,8 +91,7 @@ public class Import {
 		System.out.println("*** Import utility *** ");
 		String fileName=args[0];
 
-		//setup output database
-		Properties outputConfig=new Properties();
+		Properties outputConfig = new Properties();
 		outputConfig.load(new FileInputStream(args[1]));
 
 		Import importer=new Import(new File(fileName), outputConfig);

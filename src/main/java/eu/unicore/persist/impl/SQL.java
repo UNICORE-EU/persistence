@@ -18,7 +18,7 @@ public abstract class SQL<T> extends Base<T>{
 	}
 
 	protected abstract List<String> getSQLCreateTable() throws PersistenceException;
-	
+
 	protected String getSQLStringType(){
 		return "VARCHAR";
 	}
@@ -37,8 +37,8 @@ public abstract class SQL<T> extends Base<T>{
 
 	protected String getSQLInsert(){
 		if(pd.getColumns().size()>0){
-			StringBuffer columns=new StringBuffer();
-			StringBuffer columnValues=new StringBuffer();
+			StringBuffer columns = new StringBuffer();
+			StringBuffer columnValues = new StringBuffer();
 			for(ColumnDescriptor c: pd.getColumns()){
 				columns.append(","+c.getColumn());
 				columnValues.append(",?");
@@ -53,7 +53,7 @@ public abstract class SQL<T> extends Base<T>{
 
 	protected String getSQLUpdate(){
 		if(pd.getColumns().size()>0){
-			StringBuffer columns=new StringBuffer();
+			StringBuffer columns = new StringBuffer();
 			for(ColumnDescriptor c: pd.getColumns()){
 				columns.append(","+c.getColumn()+"=?");
 			}
