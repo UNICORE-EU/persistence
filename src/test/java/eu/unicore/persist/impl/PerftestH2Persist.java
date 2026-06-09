@@ -30,7 +30,7 @@ public class PerftestH2Persist {
 		return Arrays.asList(new Object[][]{
 				// numberOfInstances, size, cache
 				{10000,5000,Boolean.FALSE},
-				{10000,5000,Boolean.FALSE}
+				{10000,5000,Boolean.TRUE}
 		});
 	}
 
@@ -56,8 +56,6 @@ public class PerftestH2Persist {
 		long start=System.currentTimeMillis();
 		p.init();
 		p.pool.cleanupPooledConnections();
-		assert 0==p.getActiveConnections();
-		System.out.println(p.getStatusMessage());
 		p.removeAll();
 		System.out.println("Init took: "+(System.currentTimeMillis()-start)+" ms.");
 		System.out.println("Testing n="+numberOfInstances+" instances, size="+size);

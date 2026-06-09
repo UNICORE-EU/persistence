@@ -45,11 +45,9 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	public void init()throws PersistenceException {
 		super.init();
 		String table = pd.getTableName();
-		int maxConn = config==null? 1 :
-			Integer.parseInt(config.getSubkeyValue(PersistenceProperties.DB_POOL_MAXSIZE,table));
-		int timeout=config==null ? Integer.MAX_VALUE:
-			Integer.parseInt(config.getSubkeyValue(PersistenceProperties.DB_POOL_TIMEOUT, table));
-		setupConnectionPool(getConnectionPoolDataSource(),maxConn,timeout);
+		int maxConn = config.getSubkeyIntValue(PersistenceProperties.DB_POOL_MAXSIZE, table);
+		int timeout = config.getSubkeyIntValue(PersistenceProperties.DB_POOL_TIMEOUT, table);
+		setupConnectionPool(getConnectionPoolDataSource(), maxConn, timeout);
 		createTables();
 	}
 
@@ -426,15 +424,6 @@ public abstract class PersistImpl<T> extends SQL<T> {
 		}catch(SQLException s) {
 			throw new PersistenceException(s);
 		}
-	}
-
-	public int getActiveConnections() {
-		return pool.getActiveConnections();
-	}
-
-	@Override
-	public String getStatusMessage(){
-		return connectionURL+" <"+getActiveConnections()+"> connections.";
 	}
 
 	protected boolean tableExists() throws PersistenceException {

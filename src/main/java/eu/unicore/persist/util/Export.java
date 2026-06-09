@@ -17,7 +17,6 @@ import eu.unicore.persist.Persist;
 import eu.unicore.persist.PersistenceException;
 import eu.unicore.persist.PersistenceFactory;
 import eu.unicore.persist.PersistenceProperties;
-import eu.unicore.persist.impl.PersistImpl;
 
 /**
  * Exports a database to a JSON file
@@ -31,12 +30,6 @@ public class Export {
 	private Gson gson;
 	private Writer output;
 	Class daoClass;
-
-	public Export(PersistImpl<?> input, String outputFile)throws Exception{
-		this.input = input;
-		daoClass=input.getDaoClass();
-		completeSetup(outputFile);
-	}
 
 	@SuppressWarnings("unchecked")
 	public Export(Properties inputConfig, String outputFile)throws Exception{

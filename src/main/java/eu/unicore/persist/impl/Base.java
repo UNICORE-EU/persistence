@@ -4,9 +4,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
@@ -25,17 +22,15 @@ import eu.unicore.util.configuration.ConfigurationException;
  */
 public abstract class Base<T> implements Persist<T>{
 
-	private static final Logger logger = LogManager.getLogger("unicore.persistence.Base");
-
 	protected final Class<T> daoClass;
 
 	protected final PersistenceDescriptor pd;
 
-	protected PersistenceProperties config;
+	protected PersistenceProperties config = new PersistenceProperties();
 
 	private Cache<String,T> cache;
 
-	private Boolean caching = null;
+	private Boolean caching = Boolean.FALSE;
 
 	private LockSupport lockSupport;
 
@@ -66,8 +61,7 @@ public abstract class Base<T> implements Persist<T>{
 			initCache();
 			createMarshaller();
 		} catch (Exception e) {
-			logger.error("Error setting up persistence implementation for table <"+table+">",e);
-			throw new PersistenceException(e);
+			throw new PersistenceException("Error setting up persistence implementation for table <"+table+">", e);
 		}
 	}
 
@@ -100,22 +94,16 @@ public abstract class Base<T> implements Persist<T>{
 	 * cache is initialised if the per-table property  {@link PersistenceProperties#DB_CACHE_ENABLE} is set to "true"
 	 */
 	protected synchronized void initCache(){
-		boolean cacheEnabled = config==null ?
-				true : Boolean.parseBoolean(config.getSubkeyValue(PersistenceProperties.DB_CACHE_ENABLE, pd.getTableName()));
-		if( Boolean.TRUE.equals(caching) || (config!=null && cacheEnabled )){
+		boolean cacheEnabled = Boolean.parseBoolean(config.getSubkeyValue(PersistenceProperties.DB_CACHE_ENABLE, pd.getTableName()));
+		if( Boolean.TRUE.equals(caching) || cacheEnabled ){
 			caching = Boolean.TRUE;
-			String defaultCacheSize = "10";
-			String cacheMaxSizeS = config!=null?config.getSubkeyValue(PersistenceProperties.DB_CACHE_MAX_SIZE,pd.getTableName()):defaultCacheSize;
-			int cacheMaxSize = Integer.parseInt(cacheMaxSizeS);
+			int cacheMaxSize = config.getSubkeyIntValue(PersistenceProperties.DB_CACHE_MAX_SIZE,pd.getTableName());
 			cache = CacheBuilder.newBuilder()
 					.maximumSize(cacheMaxSize)
 					.expireAfterAccess(3600, TimeUnit.SECONDS)
 					.expireAfterWrite(3600, TimeUnit.SECONDS)
 					.softValues()
 					.build();
-		}
-		else{
-			caching = Boolean.FALSE;
 		}
 	}
 
@@ -124,7 +112,7 @@ public abstract class Base<T> implements Persist<T>{
 		try{
 			return getForUpdate(id,Long.MAX_VALUE,TimeUnit.MILLISECONDS);
 		}catch(TimeoutException te){
-			throw new PersistenceException("",te);
+			throw new PersistenceException(te);
 		}
 	}
 
@@ -132,8 +120,8 @@ public abstract class Base<T> implements Persist<T>{
 	public void lock(String id, long timeout, TimeUnit unit)throws TimeoutException, InterruptedException {
 		Lock lock = lockSupport.getOrCreateLock(id);
 		if(!lock.tryLock(timeout, unit)){
-			throw new TimeoutException("Time out reached: lock for table= "+pd.getTableName()
-										+" uid=<"+id+"> could not be acquired");
+			throw new TimeoutException("Time out reached: lock for "+
+					pd.getTableName()+":"+id+" could not be acquired");
 		}
 	}
 
@@ -152,8 +140,8 @@ public abstract class Base<T> implements Persist<T>{
 			return result;
 		}
 		else {
-			throw new TimeoutException("Time out reached: lock for table= "+pd.getTableName()
-										+" uid=<"+id+"> could not be acquired");
+			throw new TimeoutException("Time out reached: lock for "
+					+pd.getTableName()+":"+id+" could not be acquired");
 		}
 	}
 
@@ -211,14 +199,11 @@ public abstract class Base<T> implements Persist<T>{
 		Lock lock = lockSupport.getLockIfExists(id);
 		if(lock!=null && !lock.tryLock())throw new IllegalStateException("No write permission has been acquired!");
 		try{
-			logger.debug("[{}] Persisting <{}>", pd.getTableName(), id);
 			_write(dao, id);
 			if(caching){
 				try{
 					cache.put(pd.getID(dao),copy(dao));
-				}catch(Exception cn){
-					throw new PersistenceException("Error updating cache!",cn);
-				}
+				}catch(Exception cn){}
 			}
 		}finally{
 			if(lock!=null){
@@ -276,10 +261,6 @@ public abstract class Base<T> implements Persist<T>{
 
 	protected abstract void _removeAll() throws PersistenceException;
 
-	public Class<T> getDaoClass(){
-		return daoClass;
-	}
-
 	/**
 	 * create a true copy of the supplied object
 	 */
@@ -294,10 +275,6 @@ public abstract class Base<T> implements Persist<T>{
 
 	public long getCacheHits() {
 		return cacheHits;
-	}
-
-	public String getStatusMessage(){
-		return "OK";
 	}
 
 }

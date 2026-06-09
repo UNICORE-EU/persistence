@@ -65,7 +65,6 @@ public class H2Persist<T> extends PersistImpl<T>{
 	@Override
 	public void init()throws PersistenceException {
 		super.init();
-		if(config==null)return;
 		resetCache();
 		instances.add(this);
 	}
@@ -80,7 +79,7 @@ public class H2Persist<T> extends PersistImpl<T>{
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
 				try(Statement s = conn.createStatement()){
-					String cacheSize = config.getSubkeyValue(PersistenceProperties.H2_CACHESIZE, pd.getTableName());
+					int cacheSize = config.getSubkeyIntValue(PersistenceProperties.H2_CACHESIZE, pd.getTableName());
 					s.execute("SET CACHE_SIZE "+cacheSize);
 					logger.debug("Set H2 cache size to {} kb.", cacheSize);
 				}
@@ -134,30 +133,25 @@ public class H2Persist<T> extends PersistImpl<T>{
 		if(connectionURL!=null){
 			return connectionURL;
 		}
-		String tableName  =pd.getTableName();
-		String dir = null;
+		String tableName = pd.getTableName();
+		
 		if(serverMode==null){
-			serverMode = config==null ?
-					false : Boolean.parseBoolean(config.getSubkeyValue(PersistenceProperties.H2_SERVER_MODE, tableName));
+			serverMode = config.getSubkeyBooleanValue(PersistenceProperties.H2_SERVER_MODE, tableName);
 		}
-		if(config!=null){
-			dir = config.getSubkeyValue(PersistenceProperties.DB_DIRECTORY,tableName);
-		}
+		String dir = config.getSubkeyValue(PersistenceProperties.DB_DIRECTORY,tableName);
 		if(!(new File(dir).isAbsolute())){
 			dir = "./"+dir;
 		}
 		String params = "DB_CLOSE_ON_EXIT=FALSE";
-		String additionalParams = config==null ?
-				null : config.getSubkeyValue(PersistenceProperties.H2_OPTIONS, tableName);
+		String additionalParams = config.getSubkeyValue(PersistenceProperties.H2_OPTIONS, tableName);
 		if(additionalParams!=null){
 			params += ";" + additionalParams;
 		}
 		String id = getDatabaseName();
 		if(serverMode){
-			String host = config==null ?
-					"localhost" : config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
-			String port = config==null ?
-					"3306" : config.getSubkeyValue(PersistenceProperties.DB_PORT, pd.getTableName());
+			String host = config.getSubkeyValue(PersistenceProperties.DB_HOST, tableName);
+			Integer port = config.getSubkeyIntValue(PersistenceProperties.DB_PORT, tableName);
+			if(port==null)port = getDefaultPort();
 			connectionURL = "jdbc:h2:tcp://"+host+":"+port+"/"+dir+File.separator+id+";AUTO_RECONNECT=TRUE;"+params;
 		}else{
 			connectionURL = "jdbc:h2:file:"+dir+File.separator+id+";"+params;

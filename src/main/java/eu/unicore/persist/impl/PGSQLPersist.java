@@ -70,15 +70,13 @@ public class PGSQLPersist<T> extends PersistImpl<T>{
 	protected ConnectionPoolDataSource getConnectionPoolDataSource(){
 		PGConnectionPoolDataSource ds = new PGConnectionPoolDataSource();
 		ds.setDatabaseName(getDatabaseName());
-		String sqlHost = config==null ?
-				"localhost" : config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
+		String sqlHost = config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
 		int port = getDatabaseServerPort();
 		ds.setPortNumbers(new int[] { port });
 		ds.setServerNames(new String[] { sqlHost });
 		ds.setUser(getUserName());
 		ds.setPassword(getPassword());
-		String sslModeS = config==null ?
-				"true" : config.getSubkeyValue(PersistenceProperties.PGSQL_SSL, pd.getTableName());
+		String sslModeS = config.getSubkeyValue(PersistenceProperties.PGSQL_SSL, pd.getTableName());
 		boolean sslMode = Boolean.parseBoolean(sslModeS);
 		ds.setSsl(sslMode);
 		if(sslMode) {

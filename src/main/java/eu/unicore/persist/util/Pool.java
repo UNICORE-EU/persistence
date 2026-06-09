@@ -113,8 +113,7 @@ public class Pool {
 	 * @return a new Connection object.
 	 */
 	public Connection getConnection() throws SQLException {
-		// This routine is unsynchronized, because semaphore.tryAcquire() may
-		// block.
+		// This routine is unsynchronized, because semaphore.tryAcquire() may block.
 		synchronized (this) {
 			if (isDisposed)
 				throw new IllegalStateException(
@@ -140,9 +139,7 @@ public class Pool {
 
 	private synchronized Connection getConnection2() throws SQLException {
 		if (isDisposed)
-			throw new IllegalStateException(
-					"Connection pool has been disposed."); // test again with
-															// lock
+			throw new IllegalStateException("Connection pool has been disposed.");
 		PooledConnection pconn;
 		if (!recycledConnections.isEmpty()) {
 			pconn = recycledConnections.remove();
@@ -189,14 +186,16 @@ public class Pool {
 			throw new AssertionError();
 	}
 
-	private class PoolConnectionEventListener implements
-			ConnectionEventListener {
+	private class PoolConnectionEventListener implements ConnectionEventListener {
+
+		@Override
 		public void connectionClosed(ConnectionEvent event) {
 			PooledConnection pconn = (PooledConnection) event.getSource();
 			pconn.removeConnectionEventListener(this);
 			recycleConnection(pconn);
 		}
 
+		@Override
 		public void connectionErrorOccurred(ConnectionEvent event) {
 			PooledConnection pconn = (PooledConnection) event.getSource();
 			pconn.removeConnectionEventListener(this);
@@ -204,15 +203,4 @@ public class Pool {
 		}
 	}
 
-	/**
-	 * Returns the number of active (open) connections of this pool. This is the
-	 * number of <code>Connection</code> objects that have been issued by
-	 * {@link #getConnection()} for which <code>Connection.close()</code> has
-	 * not yet been called.
-	 * 
-	 * @return the number of active connections.
-	 **/
-	public synchronized int getActiveConnections() {
-		return activeConnections;
-	}
 }

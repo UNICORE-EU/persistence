@@ -74,13 +74,13 @@ public class MySQLPersist<T> extends PersistImpl<T>{
 	protected ConnectionPoolDataSource getConnectionPoolDataSource() throws PersistenceException {
 		MysqlConnectionPoolDataSource ds = new MysqlConnectionPoolDataSource();
 		ds.setDatabaseName(getDatabaseName());
-		String sqlHost=config==null?"localhost":config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
+		String sqlHost = config.getSubkeyValue(PersistenceProperties.DB_HOST, pd.getTableName());
 		ds.setPort(getDatabaseServerPort());
 		ds.setServerName(sqlHost);
 		ds.setUser(getUserName());
 		ds.setPassword(getPassword());
-		String tz = config==null?"UTC":config.getSubkeyValue(PersistenceProperties.MYSQL_TIMEZONE, pd.getTableName());
-		String sslModeS = config==null?"false":config.getSubkeyValue(PersistenceProperties.MYSQL_SSL, pd.getTableName());
+		String tz = config.getSubkeyValue(PersistenceProperties.MYSQL_TIMEZONE, pd.getTableName());
+		String sslModeS = config.getSubkeyValue(PersistenceProperties.MYSQL_SSL, pd.getTableName());
 		boolean sslMode = Boolean.parseBoolean(sslModeS);
 		try {
 			ds.setVerifyServerCertificate(false);
