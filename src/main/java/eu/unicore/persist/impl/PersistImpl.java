@@ -32,8 +32,6 @@ public abstract class PersistImpl<T> extends SQL<T> {
 
 	private static final Logger logger = LogManager.getLogger("unicore.persistence.PersistImpl");
 
-	protected String databaseName = null;
-
 	// for logging purposes
 	protected String connectionURL = "";
 
@@ -52,15 +50,15 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	}
 
 	@Override
-	public void shutdown()throws PersistenceException {
+	public void shutdown() {
 		try {
 			String shutDown = getSQLShutdown();
-			if(shutDown!=null && shutDown.length()>0) {
+			if(shutDown.length()>0) {
 				_execute(getSQLShutdown());
 			}
 		}
 		catch(Exception e){
-			logger.warn("Shutting down: "+e.getMessage());
+			logger.warn("Shutting down: {}", e.getMessage());
 		}finally{
 			shutdownPool();
 		}
@@ -237,7 +235,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	}
 
 	@Override
-	protected void _removeAll()throws PersistenceException {
+	protected void _removeAll() throws PersistenceException {
 		_executeUpdate(getSQLDeleteAll());
 	}
 
@@ -279,7 +277,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 		return marshaller.deserialize(marshaller.serialize(obj));
 	}
 
-	protected void createTables()throws PersistenceException {
+	protected void createTables() throws PersistenceException {
 		List<String> cmds = getSQLCreateTable();
 		try(Connection conn = getConnection()){
 			synchronized (conn) {
@@ -298,7 +296,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 		}
 	}
 
-	public void dropTables()throws PersistenceException {
+	public void dropTables() {
 		try{
 			_execute(getSQLDropTable());
 		}catch(PersistenceException e){
@@ -314,15 +312,11 @@ public abstract class PersistImpl<T> extends SQL<T> {
 			int i = 4;
 			Object val = null;
 			for(ColumnDescriptor c: pd.getColumns()){
-				try {
-					val=c.getMethod().invoke(dao, (Object[])null);
-				}catch(Exception ex) {
-					throw new PersistenceException(ex);
-				}
+				val = c.getMethod().invoke(dao, (Object[])null);
 				psInsert.setString(i, val!=null?val.toString():null);
 				i++;
 			}
-		} catch(SQLException s) {
+		} catch(Exception s) {
 			throw new PersistenceException(s);
 		}
 	}
@@ -334,16 +328,12 @@ public abstract class PersistImpl<T> extends SQL<T> {
 			int i=2;
 			Object val=null;
 			for(ColumnDescriptor c: pd.getColumns()){
-				try {
-					val=c.getMethod().invoke(dao, (Object[])null);
-				}catch(Exception ex) {
-					throw new PersistenceException(ex);
-				}
+				val = c.getMethod().invoke(dao, (Object[])null);
 				psUpdate.setString(i, val!=null?val.toString():null);
 				i++;
 			}
 			psUpdate.setString(i, id);
-		} catch(SQLException s) {
+		} catch(Exception s) {
 			throw new PersistenceException(s);
 		}
 	}
@@ -361,7 +351,7 @@ public abstract class PersistImpl<T> extends SQL<T> {
 
 	@Override
 	protected String getDriverName(){
-		String driver=config!=null?config.getSubkeyValue(PersistenceProperties.DB_DRIVER, pd.getTableName()):"com.mysql.cj.jdbc.Driver";
+		String driver = config.getSubkeyValue(PersistenceProperties.DB_DRIVER, pd.getTableName());
 		if(driver==null){
 			driver = getDefaultDriverName();
 		}
@@ -373,22 +363,12 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	protected abstract ConnectionPoolDataSource getConnectionPoolDataSource() throws PersistenceException;
 
 	/**
-	 * get the database to connect to
-	 * If set using {@link #setDatabaseName(String)}, that value is used. Otherwise the config is checked. If no
-	 * config is set the table name is used as a fallback.
-	 * @return
+	 * get the database to connect to. If no value is availabe in the config,
+	 * the table name is used as a fallback.
 	 */
 	protected String getDatabaseName(){
-		if(databaseName!=null)return databaseName;
-		if(config!=null){
-			String db=config.getSubkeyValue(PersistenceProperties.DB_DATABASE, pd.getTableName());
-			if(db!=null)return db;
-		}
-		return pd.getTableName();
-	}
-
-	public void setDatabaseName(String databaseName) {
-		this.databaseName = databaseName;
+		String db = config.getSubkeyValue(PersistenceProperties.DB_DATABASE, pd.getTableName());
+		return db!=null ? db : pd.getTableName();
 	}
 
 	protected String getUserName(){
@@ -407,22 +387,19 @@ public abstract class PersistImpl<T> extends SQL<T> {
 	 * @param timeout - time in seconds when to idle out connections
 	 */
 	protected void setupConnectionPool(ConnectionPoolDataSource ds, int max_connections, int timeout)throws PersistenceException{
-		if(ds==null){
-			throw new IllegalStateException("Must ConnectionPoolDataSource");
-		}
-		pool=new Pool(ds,max_connections,timeout);
-		logger.info("Connection pooling enabled, maxConnections={} timeout={}", max_connections, timeout);
+		pool = new Pool(ds,max_connections,timeout);
+		logger.debug("Connection pooling enabled, maxConnections={} timeout={}", max_connections, timeout);
 	}
 
 	protected synchronized Connection getConnection()throws SQLException {
 		return pool.getConnection();
 	}
 
-	protected void shutdownPool() throws PersistenceException {
+	protected void shutdownPool() {
 		try {
 			pool.dispose();
 		}catch(SQLException s) {
-			throw new PersistenceException(s);
+			logger.warn("Shutting down pool: {}", s.getMessage());
 		}
 	}
 
@@ -449,4 +426,5 @@ public abstract class PersistImpl<T> extends SQL<T> {
 			throw new PersistenceException(s);
 		}
 	}
+
 }

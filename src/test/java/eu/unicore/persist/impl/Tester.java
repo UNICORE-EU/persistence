@@ -42,6 +42,7 @@ public class Tester {
 	public void run() throws Exception {
 		testBasicCRUD(false);
 		testBasicCRUD(true);
+		testNoAdditionalColumns(false);
 		testAdditionalColumns(false);
 		testAdditionalColumns(true);
 		testFindIDs(true);
@@ -101,9 +102,37 @@ public class Tester {
 		assertNull(test);
 		test=p.read("2");
 		assertNull(test);
+		p.purge();
 		p.shutdown();
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	private void testNoAdditionalColumns(Boolean cache)throws Exception{
+		System.out.println("Testing "+persistClass.getName());
+		Persist<Dao0>p = (Persist<Dao0>)persistClass.getConstructor(Class.class, String.class).
+				newInstance(Dao0.class, null);
+		
+		p.setCaching(cache);
+		if(properties!=null)p.setConfigSource(properties);
+		p.init();
+		p.removeAll();
+
+		Dao0 test =new Dao0();
+		test.setId("1");
+		test.setData("testdata");
+		p.write(test);
+
+		test=p.getForUpdate("1");
+		test.setData("new-content");
+		p.write(test);
+
+		Dao0 test1=p.read("1");
+		assertNotNull(test1);
+		assertEquals("new-content", test1.getData());
+
+		p.shutdown();
+	}
+
 	@SuppressWarnings("unchecked")
 	private void testAdditionalColumns(Boolean cache)throws Exception{
 		System.out.println("Testing "+persistClass.getName());

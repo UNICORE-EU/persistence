@@ -17,6 +17,7 @@ import eu.unicore.persist.Persist;
 import eu.unicore.persist.PersistenceException;
 import eu.unicore.persist.PersistenceFactory;
 import eu.unicore.persist.PersistenceProperties;
+import eu.unicore.persist.impl.JSONMarshaller;
 
 /**
  * Exports a database to a JSON file
@@ -42,7 +43,7 @@ public class Export {
 
 	private void completeSetup(String outputFile) throws FileNotFoundException {
 		GsonBuilder builder = new GsonBuilder();
-		GSONUtil.registerTypeConverters(daoClass, builder);
+		JSONMarshaller.registerTypeConverters(daoClass, builder);
 		gson = builder.create();
 		output = new OutputStreamWriter(new FileOutputStream(outputFile));
 	}

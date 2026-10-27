@@ -25,17 +25,7 @@ public class UUID {
 	private static final BigInteger BASE = BigInteger.valueOf(62);
 	private static final String DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-	/**
-	 * Encodes a number using Base62 encoding.
-	 *
-	 * @param  number a positive integer
-	 * @return a Base62 string
-	 * @throws IllegalArgumentException if <code>number</code> is a negative integer
-	 */
 	private static String encodeB62(BigInteger number) {
-		if (number.compareTo(BigInteger.ZERO) == -1) { // number < 0
-			throw new IllegalArgumentException("number must not be negative");
-		}
 		StringBuilder result = new StringBuilder();
 		while (number.compareTo(BigInteger.ZERO) == 1) { // number > 0
 			BigInteger[] divmod = number.divideAndRemainder(BASE);

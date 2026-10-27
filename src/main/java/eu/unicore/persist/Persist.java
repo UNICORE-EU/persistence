@@ -1,6 +1,5 @@
 package eu.unicore.persist;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -24,16 +23,16 @@ public interface Persist<T> {
 
 	/**
 	 * get an object from the persistence layer for read-only access
-	 * 
-	 * @param id
-	 * @return T
+	 *
+	 * @param id - the object's ID
+	 * @return T - the requested object, or <code>null</code> if it does not exist
 	 */
-	public T read(String id)throws PersistenceException, SQLException;
-	
+	public T read(String id) throws PersistenceException;
+
 	/**
-	 * Get an object from the persistence layer and aquire a write lock<br/>
+	 * Get an object from the persistence layer and acquire a write lock<br/>
 	 * 
-	 * NOTE: The default timeout for lock aquisition is INFINITE<br/>
+	 * NOTE: The default timeout for lock acquisition is INFINITE<br/>
 	 *  
 	 * This must always be called using the following pattern:
 	 * <pre>
@@ -54,13 +53,13 @@ public interface Persist<T> {
 	 * 
 	 * In case the requested object does not exist, <code>null</code> is returned, and no lock is aquired
 	 * 
-	 * @param id
-	 * @return the requested object , or <code>null</code> if it does not exist
+	 * @param id - the object's ID
+	 * @return the requested object, or <code>null</code> if it does not exist
 	 * @throws PersistenceException - if errors related to the storage occur
 	 * @throws InterruptedException - if the current thread is interrupted while waiting for lock aquisition
 	 */
-	public T getForUpdate(String id)throws PersistenceException, SQLException, InterruptedException;
-	
+	public T getForUpdate(String id)throws PersistenceException, InterruptedException;
+
 	/**
 	 * get an object from the persistence layer and aquire a write lock. 
 	 * Will wait for the given amount of time to aquire the lock. <br/>
@@ -87,13 +86,13 @@ public interface Persist<T> {
 	 * @param id - the id of the object to get
 	 * @param timeout - time out value
 	 * @param unit - time out unit
-	 * @return the requested object , or <code>null</code> if it does not exist
+	 * @return the requested object, or <code>null</code> if it does not exist
 	 * @throws PersistenceException - if errors related to the storage occur
-	 * @throws TimeoutException - if the lock cannot be aquired in the given timeout 
-	 * @throws InterruptedException - if the current thread is interrupted while waiting for lock aquisition
+	 * @throws TimeoutException - if the lock cannot be acquired in the given timeout 
+	 * @throws InterruptedException - if the current thread is interrupted while waiting for lock acquisition
 	 */
-	public T getForUpdate(String id,long timeout, TimeUnit unit)throws PersistenceException, SQLException, TimeoutException, InterruptedException;
-	
+	public T getForUpdate(String id,long timeout, TimeUnit unit)throws PersistenceException, TimeoutException, InterruptedException;
+
 	/**
 	 * get an object from the persistence layer and aquire a write lock. 
 	 * This method returns immediately returning <code>null</code> if the lock cannot be aquired.<br/>
@@ -101,7 +100,7 @@ public interface Persist<T> {
 	 * This must always be called using the following pattern:
 	 * <pre>
 	 *  
-	 *   Foo f=persist.tryGetForUpdate(id);
+	 *   Foo f = persist.tryGetForUpdate(id);
 	 *   try{
 	 *    ...
 	 *   }
@@ -117,65 +116,64 @@ public interface Persist<T> {
 	 * In case the requested object does not exist, <code>null</code> is returned, and NO lock is aquired
 	 * 
 	 * @param id - the id of the object to get
-	 * @return the requested object , or <code>null</code> if it does not exist
+	 * @return the requested object, or <code>null</code> if it does not exist
 	 * @throws PersistenceException - if errors related to the storage occur
+	 * @throws TimeoutException - if the lock cannot be acquired in the given timeout 
+	 * @throws InterruptedException - if the current thread is interrupted while waiting for lock acquisition
 	 */
-	public T tryGetForUpdate(String id)throws PersistenceException, SQLException, TimeoutException,InterruptedException;
-	
-	public void lock(String id, long timeout, TimeUnit unit)throws TimeoutException, InterruptedException;
-	
-	public void unlock(T dao)throws PersistenceException;
-	
+	public T tryGetForUpdate(String id) throws PersistenceException, TimeoutException, InterruptedException;
+
+	public void lock(String id, long timeout, TimeUnit unit) throws TimeoutException, InterruptedException;
+
+	public void unlock(T dao) throws PersistenceException;
+
 	/**
 	 * insert or update
 	 * 
 	 * @param dao
 	 */
-	public void write(T dao)throws PersistenceException, SQLException;
-	
+	public void write(T dao) throws PersistenceException;
 
 	/**
 	 * delete the entry, but keep the lock.
 	 *
 	 * @param id of the entry to remove
 	 */
-	public void delete(String id)throws PersistenceException, SQLException;
-	
+	public void delete(String id) throws PersistenceException;
+
 	/**
 	 * delete the entry and remove its lock from {@link LockSupport}
 	 * 
 	 * @param id of the entry to remove
 	 */
-	public void remove(String id)throws PersistenceException, SQLException;
-	
+	public void remove(String id) throws PersistenceException;
+
 	/**
 	 * delete all entries
 	 */
-	public void removeAll()throws PersistenceException, SQLException;
-	
-	
+	public void removeAll() throws PersistenceException;
+
 	/**
 	 * get all IDs in (descending) order of creation time (ie., latest first)
 	 */
-	public List<String> getIDs()throws PersistenceException, SQLException;
-	
+	public List<String> getIDs() throws PersistenceException;
+
 	/**
 	 * get all IDs with the specified ordering
 	 * @param oldestFirst - if true, the entries will be ordered by ascending creation time
 	 */
-	public default List<String> getIDs(boolean oldestFirst)throws PersistenceException, SQLException{
+	public default List<String> getIDs(boolean oldestFirst) throws PersistenceException{
 		return getIDs();
 	}
-	
+
 	/**
 	 * get a list of dao IDs where a column has a certain value
 	 * 
 	 * @param column - the column name
 	 * @param value - the value
 	 */
-	public List<String> getIDs(String column, Object value)throws PersistenceException, SQLException;
-	
-	
+	public List<String> getIDs(String column, Object value) throws PersistenceException;
+
 	/**
 	 * get a list of dao IDs where a column matches certain values (i.e. using SQL 'LIKE')
 	 * 
@@ -183,32 +181,32 @@ public interface Persist<T> {
 	 * @param column - the column name
 	 * @param values - values to match
 	 */
-	public List<String> findIDs(boolean orMode, String column, String... values)throws PersistenceException, SQLException;
-	
+	public List<String> findIDs(boolean orMode, String column, String... values) throws PersistenceException;
+
 	/**
 	 * get a list of dao IDs where a column matches certain values (i.e. using SQL 'LIKE')
 	 * 
 	 * @param column - the column name
 	 * @param values - if giving more than one value, the search uses AND to combine
 	 */
-	public List<String> findIDs(String column, String... values)throws PersistenceException, SQLException;
-	
+	public List<String> findIDs(String column, String... values) throws PersistenceException;
+
 	/**
 	 * get a map containing the values of one particular column
 	 * 
 	 * @param column - the column name
 	 * @return a Map of column values keyed with the ID
 	 */
-	public Map<String,String> getColumnValues(String column)throws PersistenceException, SQLException;
-	
+	public Map<String,String> getColumnValues(String column) throws PersistenceException;
+
 	/**
 	 * get the number of rows
 	 * 
 	 * @return the number of rows
 	 * @throws PersistenceException
 	 */
-	public int getRowCount()throws PersistenceException, SQLException;
-	
+	public int getRowCount() throws PersistenceException;
+
 	/**
 	 * get the number of rows where a column has a certain value
 	 * 
@@ -217,9 +215,8 @@ public interface Persist<T> {
 	 * @return row count
 	 * @throws PersistenceException
 	 */
-	public int getRowCount(String column, Object value)throws PersistenceException, SQLException;
-	
-	
+	public int getRowCount(String column, Object value) throws PersistenceException;
+
 	//lifecycle methods
 
 	public void setConfigSource(PersistenceProperties configSource);
@@ -231,10 +228,10 @@ public interface Persist<T> {
 	 */
 	public void setLockSupport(LockSupport locks);
 	
-	public void init() throws PersistenceException, SQLException;
-	
-	public void shutdown()throws PersistenceException, SQLException;
-	
+	public void init() throws PersistenceException;
+
+	public void shutdown();
+
 	public void setCaching(boolean value);
 
 	/**
@@ -244,5 +241,5 @@ public interface Persist<T> {
 	 * like DB tables or directories will be removed by this operation.
 	 */
 	public void purge();
-	
+
 }

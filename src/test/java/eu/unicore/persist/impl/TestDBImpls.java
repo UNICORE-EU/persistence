@@ -21,6 +21,7 @@ public class TestDBImpls {
 		p.setConfigSource(cf);
 		System.out.println(p.getSQLCreateTable());
 		assertEquals("LONGTEXT", p.getSQLStringType());
+		assertEquals("", p.getSQLShutdown());
 		System.out.println(p.getSQLDelete("1234"));
 		assertEquals(3306, p.getDefaultPort());
 		Class.forName(p.getDefaultDriverName());
@@ -39,6 +40,7 @@ public class TestDBImpls {
 		p.setConfigSource(cf);
 		System.out.println(p.getSQLCreateTable());
 		assertEquals("TEXT", p.getSQLStringType());
+		assertEquals("", p.getSQLShutdown());
 		System.out.println(p.getSQLDelete("1234"));
 		assertEquals(5432, p.getDefaultPort());
 		Class.forName(p.getDefaultDriverName());

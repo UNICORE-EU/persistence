@@ -16,6 +16,7 @@ import eu.unicore.persist.Persist;
 import eu.unicore.persist.PersistenceException;
 import eu.unicore.persist.PersistenceFactory;
 import eu.unicore.persist.PersistenceProperties;
+import eu.unicore.persist.impl.JSONMarshaller;
 
 /**
  * Imports a database from a JSON file
@@ -44,9 +45,10 @@ public class Import {
 		daoClass = Class.forName((String)outputConfig.remove("class"));
 		Class inPersistImpl = Class.forName(outputConfig.getProperty("persistence.class"));
 		String inTableName = (String)outputConfig.remove("tableName");
-		output=PersistenceFactory.get(new PersistenceProperties(outputConfig)).configurePersist(daoClass, inPersistImpl, inTableName);
+		output = PersistenceFactory.get(new PersistenceProperties(outputConfig)).
+				configurePersist(daoClass, inPersistImpl, inTableName);
 		GsonBuilder builder = new GsonBuilder();
-		GSONUtil.registerTypeConverters(daoClass, builder);
+		JSONMarshaller.registerTypeConverters(daoClass, builder);
 		gson = builder.create();
 	}
 

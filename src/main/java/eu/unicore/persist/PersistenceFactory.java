@@ -10,7 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.persist.impl.ClassScanner;
-import eu.unicore.persist.impl.H2Persist;
 import eu.unicore.util.configuration.ConfigurationException;
 
 
@@ -50,13 +49,6 @@ public class PersistenceFactory {
 	}
 
 	/**
-	 * returns the effective configuration
-	 */
-	public PersistenceProperties getConfig() {
-		return config;
-	}
-
-	/**
 	 * create a persistence handler for the given class
 	 *
 	 * @param <T> - the type of java class to be persisted
@@ -64,7 +56,7 @@ public class PersistenceFactory {
 	 * @return {@link Persist} implementation
 	 * @throws PersistenceException
 	 */
-	public <T> Persist<T> getPersist(Class<T> daoClass) throws PersistenceException{
+	public <T> Persist<T> getPersist(Class<T> daoClass) throws Exception{
 		return getPersist(daoClass, null);
 	}
 
@@ -77,12 +69,8 @@ public class PersistenceFactory {
 	 * @return {@link Persist} implementation
 	 * @throws PersistenceException
 	 */
-	public <T> Persist<T> getPersist(Class<T> daoClass, String tableName) throws PersistenceException{
-		try{
-			return configurePersist(daoClass, getPersistClass(daoClass, tableName), tableName);
-		}catch(Exception e){
-			throw new PersistenceException(e);
-		}
+	public <T> Persist<T> getPersist(Class<T> daoClass, String tableName) throws Exception {
+		return configurePersist(daoClass, getPersistClass(daoClass, tableName), tableName);
 	}
 
 	/**
@@ -107,9 +95,6 @@ public class PersistenceFactory {
 			tableName = ClassScanner.getTableName(daoClass);
 		}
 		String clazz = config.getSubkeyValue(PersistenceProperties.DB_IMPL, tableName);
-		if(clazz==null){
-			clazz = H2Persist.class.getName();
-		}
 		if(clazz.startsWith("de.fzj.unicore.persist")) {
 			String old = clazz;
 			clazz = clazz.replace("de.fzj.unicore", "eu.unicore");
@@ -117,5 +102,5 @@ public class PersistenceFactory {
 		}
 		return (Class<? extends Persist<T>>)Class.forName(clazz);
 	}
-	
+
 }

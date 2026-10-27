@@ -70,7 +70,7 @@ public class H2Persist<T> extends PersistImpl<T>{
 	}
 
 	@Override
-	public void shutdown() throws PersistenceException {
+	public void shutdown() {
 		instances.remove(this);
 		super.shutdown();
 	}
@@ -109,11 +109,6 @@ public class H2Persist<T> extends PersistImpl<T>{
 					pd.getTableName(), stringType, getTimeStamp()));
 		}
 		return cmds;
-	}
-
-	@Override
-	protected String getSQLStringType(){
-		return "VARCHAR";
 	}
 
 	@Override

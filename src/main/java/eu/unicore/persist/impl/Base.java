@@ -1,5 +1,6 @@
 package eu.unicore.persist.impl;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
@@ -100,8 +101,8 @@ public abstract class Base<T> implements Persist<T>{
 			int cacheMaxSize = config.getSubkeyIntValue(PersistenceProperties.DB_CACHE_MAX_SIZE,pd.getTableName());
 			cache = CacheBuilder.newBuilder()
 					.maximumSize(cacheMaxSize)
-					.expireAfterAccess(3600, TimeUnit.SECONDS)
-					.expireAfterWrite(3600, TimeUnit.SECONDS)
+					.expireAfterAccess(Duration.ofSeconds(3600))
+					.expireAfterWrite(Duration.ofSeconds(3600))
 					.softValues()
 					.build();
 		}
@@ -162,13 +163,6 @@ public abstract class Base<T> implements Persist<T>{
 		return result;
 	}
 
-	/**
-	 * read an instance from storage
-	 * 
-	 * @param id - the ID of the instance to read
-	 * @return
-	 * @throws PersistenceException
-	 */
 	@Override
 	public T read(String id)throws PersistenceException {
 		T result = null;

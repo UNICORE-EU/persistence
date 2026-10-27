@@ -112,7 +112,7 @@ public abstract class SQL<T> extends Base<T>{
 	}
 
 	protected String getSQLShutdown(){
-		return null;
+		return "";
 	}
 	
 	protected String getTimeStamp() {

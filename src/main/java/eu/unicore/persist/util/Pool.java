@@ -59,10 +59,9 @@ public class Pool {
 		this.dataSource = dataSource;
 		this.maxConnections = maxConnections;
 		this.timeout = timeout;
-		if (maxConnections < 1)
-			throw new IllegalArgumentException("Invalid maxConnections value.");
+		assert maxConnections >= 1 ;
 		semaphore = new Semaphore(maxConnections, true);
-		recycledConnections = new LinkedList<PooledConnection>();
+		recycledConnections = new LinkedList<>();
 		poolConnectionEventListener = new PoolConnectionEventListener();
 	}
 
@@ -167,8 +166,7 @@ public class Pool {
 	}
 
 	private synchronized void disposeConnection(PooledConnection pconn) {
-		if (activeConnections <= 0)
-			throw new AssertionError();
+		assert activeConnections> 0;
 		activeConnections--;
 		semaphore.release();
 		try {
@@ -178,29 +176,32 @@ public class Pool {
 	}
 
 	private void assertInnerState() {
-		if (activeConnections < 0)
-			throw new AssertionError();
-		if (activeConnections + recycledConnections.size() > maxConnections)
-			throw new AssertionError();
-		if (activeConnections + semaphore.availablePermits() > maxConnections)
-			throw new AssertionError();
+		assert activeConnections >= 0;
+		assert maxConnections>=activeConnections + recycledConnections.size();
+		assert maxConnections>=activeConnections + semaphore.availablePermits();
 	}
 
 	private class PoolConnectionEventListener implements ConnectionEventListener {
 
 		@Override
 		public void connectionClosed(ConnectionEvent event) {
-			PooledConnection pconn = (PooledConnection) event.getSource();
-			pconn.removeConnectionEventListener(this);
-			recycleConnection(pconn);
+			handle(event, true);
 		}
 
 		@Override
 		public void connectionErrorOccurred(ConnectionEvent event) {
+			handle(event, false);
+		}
+
+		private void handle(ConnectionEvent event, boolean reuse) {
 			PooledConnection pconn = (PooledConnection) event.getSource();
 			pconn.removeConnectionEventListener(this);
-			disposeConnection(pconn);
+			if(reuse)
+				recycleConnection(pconn);
+			else
+				disposeConnection(pconn);
 		}
+
 	}
 
 }

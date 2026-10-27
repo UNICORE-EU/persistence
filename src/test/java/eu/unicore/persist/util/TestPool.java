@@ -1,5 +1,7 @@
 package eu.unicore.persist.util;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -32,7 +34,7 @@ public class TestPool {
 
 	@Test
 	public void test() throws Exception {
-		System.out.println("Program started.");
+		System.out.println("Testing connection pool.");
 		ConnectionPoolDataSource dataSource = createDataSource();
 		poolMgr = new Pool(dataSource, maxConnections);
 		initDb();
@@ -41,8 +43,11 @@ public class TestPool {
 		System.out.println("\nStopping threads.");
 		stopWorkerThreads();
 		System.out.println("\nAll threads stopped.");
-		poolMgr.dispose();
-		System.out.println("Program completed.");
+		// for better test coverage, overlap dispose() with active connection 
+		try (Connection c = poolMgr.getConnection()){
+			poolMgr.dispose();
+		}
+		assertThrows(IllegalStateException.class, ()->{poolMgr.getConnection();});
 	}
 	
 	private static class WorkerThread extends Thread {
